@@ -45,6 +45,10 @@ class Room:
         Room._directions[forward] = reverse
         Room._directions[reverse] = forward
 
+        # Set class attributes to None to act as defaults
+        setattr(Room, forward, None)
+        setattr(Room, reverse, None)
+
     def __init__(self, description):
         self.description = description.strip()
 
@@ -63,7 +67,7 @@ class Room:
 
     def exits(self):
         """Get a list of directions to exit the room."""
-        return sorted(d for d in self._directions if hasattr(self, d))
+        return sorted(d for d in self._directions if getattr(self, d))
 
     def __setattr__(self, name, value):
         if isinstance(value, Room):
@@ -176,7 +180,15 @@ def start(help=True):
         commands.insert(0, (('help',), help))
         commands.insert(0, (('?',), help))
     while True:
-        cmd = input(prompt())
+        try:
+            cmd = input(prompt()).strip()
+        except EOFError:
+            print()
+            break
+
+        if not cmd:
+            continue
+
         ws = tuple(cmd.lower().split())
         for match, func in commands:
             args = {}
