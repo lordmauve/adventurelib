@@ -107,6 +107,25 @@ Here are the rules for what you can write:
   be converted to lower case.
 
 
+Additional parameters to commands
+---------------------------------
+
+In some cases, you might like to use a function to handle a number of similar
+commands.
+
+You can pass additional keyword arguments to the ``@when`` decorator which will
+be passed into the handler function whenever that version of the command line
+matched.
+
+For example::
+
+    @when('shout', action='bellow')
+    @when('yell', action='holler')
+    @when('scream', action='shriek')
+    def shout(action):
+        print('You %s loudly.' % action)
+
+
 Calling @when functions yourself
 --------------------------------
 

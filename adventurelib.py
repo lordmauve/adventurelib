@@ -8,7 +8,6 @@ commands = []
 
 __all__ = (
     'when',
-    'when_move',
     'start',
     'Room'
 )
@@ -87,7 +86,7 @@ Room.add_direction('north', 'south')
 Room.add_direction('east', 'west')
 
 
-def _register(command, func):
+def _register(command, func, kwargs={}):
     """Register func as a handler for the given command."""
     words = command.split()
     match = []
@@ -112,17 +111,18 @@ def _register(command, func):
             )
 
     sig = inspect.signature(func)
-    func_argnames = list(sig.parameters)
-    if func_argnames != argnames:
+    func_argnames = set(sig.parameters)
+    when_argnames = set(argnames) | set(kwargs.keys())
+    if func_argnames != when_argnames:
         raise InvalidCommand(
-            'The function %s%s has the wrong signature for %r' % (
+            'The function %s%s has the wrong signature for @when(%r)' % (
                 func.__name__, sig, command
-            ) + '\n\n' + 'The function arguments should be named (%s)' % (
-                ', '.join(argnames)
+            ) + '\n\nThe function arguments should be (%s)' % (
+                ', '.join(argnames + list(kwargs.keys()))
             )
         )
 
-    commands.append((tuple(match), func))
+    commands.append((tuple(match), func, kwargs))
 
 
 def prompt():
@@ -135,40 +135,18 @@ def no_command_matches(command):
     print("I don't understand '%s'." % command)
 
 
-def when(command):
+def when(command, **kwargs):
     """Decorator for command functions."""
     def dec(func):
-        _register(command, func)
+        _register(command, func, kwargs)
         return func
     return dec
-
-
-def when_move(func=None):
-    """Register a function to be called for move operations.
-
-    This will register the function for all currently defined directions.
-
-    The function should be of the form::
-
-        def move(direction):
-
-    and will be called with the direction that should be moved.
-
-    """
-    def dec(func):
-        for d in Room._directions:
-            commands.append(((d,), partial(func, d)))
-        return func
-    if func:
-        return dec(func)
-    else:
-        return dec
 
 
 def help():
     """Print a list of the commands you can give."""
     print('Here is a list of the commands you can give:')
-    for match, func in sorted(commands):
+    for match, func, kwargs in sorted(commands):
         print(' '.join(str(t) for t in match))
 
 
@@ -177,8 +155,8 @@ def start(help=True):
     if help:
         # Ugly, but we want to keep the arguments consistent
         help = globals()['help']
-        commands.insert(0, (('help',), help))
-        commands.insert(0, (('?',), help))
+        commands.insert(0, (('help',), help, {}))
+        commands.insert(0, (('?',), help, {}))
     while True:
         try:
             cmd = input(prompt()).strip()
@@ -190,8 +168,8 @@ def start(help=True):
             continue
 
         ws = tuple(cmd.lower().split())
-        for match, func in commands:
-            args = {}
+        for match, func, kwargs in commands:
+            args = kwargs.copy()
             for cword, word in zip_longest(match, ws):
                 if word is None:
                     break

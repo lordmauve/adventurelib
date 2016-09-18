@@ -149,20 +149,21 @@ moving or looking in a direction).
     Get a list of direction names where a direction is set.
 
 
-The @when_move decorator
-------------------------
+Moving between rooms
+--------------------
 
 To follow the links you've defined you could define separate ``north``,
 ``south``, ``east`` and ``west`` handlers - but the code would be mostly the
 same, and this is annoying to type and make changes to.
 
-Instead, we can define one function that will be called no matter what
-direction command the player enters. Instead of the ``@when`` decorator, we
-use the ``@when_move`` decorator instead. This doesn't take a command string;
-instead it creates commands for each direction, and the function will be
-called with the name of the direction the player typed::
+Instead, we can define one function and use several different ``@when`` lines
+to define the directions we will go. Each one will pass a direction in which
+to go.::
 
-    @when_move
+    @when('north', direction='north')
+    @when('south', direction='south')
+    @when('east', direction='east')
+    @when('west', direction='west')
     def go(direction):
         global current_room
         room = current_room.exit(direction)
@@ -182,6 +183,18 @@ Then in game::
     You go south.
     It is a bright, sunny day.
 
+These can be some of the most heavily used command, so you could also provide
+alias commands ``n``, ``s``, ``e`` and ``w`` as a convenience::
+
+    @when('north', direction='north')
+    @when('south', direction='south')
+    @when('east', direction='east')
+    @when('west', direction='west')
+    @when('s', direction='south')
+    @when('e', direction='east')
+    @when('w', direction='west')
+    def go(direction):
+        ...
 
 Adding more directions
 ----------------------

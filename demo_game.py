@@ -12,7 +12,10 @@ You are in a beautiful valley.
 inventory = []
 
 
-@when_move
+@when('north', direction='north')
+@when('south', direction='south')
+@when('east', direction='east')
+@when('west', direction='west')
 def go(direction):
     global current_room
     room = current_room.exit(direction)
