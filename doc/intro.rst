@@ -59,7 +59,11 @@ command::
             "brush and dozily jiggle it round your mouth a bit."
         )
 
-If you restart
+If you start the game again you can try out the new command::
+
+    > brush teeth
+    You squirt a bit too much toothpaste onto your brush and dozily jiggle it
+    round your mouth a bit.
 
 Be creative
 -----------
