@@ -1,0 +1,4 @@
+global-include *.py *.rst
+include LICENSE
+include README.md
+include doc/Makefile
