@@ -69,7 +69,7 @@ what room the player is in; this is your responsibility!::
             "hand on the button to close the outer door."
         )
 
-        # Show the room direction to indicate we have arrived.
+        # Show the room description to indicate we have arrived.
         print(current_room)
 
 

@@ -1,10 +1,13 @@
 import re
+import sys
 import inspect
 import readline
 from functools import partial
 from itertools import zip_longest
 
-commands = []
+commands = [
+    (('quit',), sys.exit, {}),  # quit command is built-in
+]
 
 __all__ = (
     'when',

@@ -19,6 +19,7 @@ Contents:
     :maxdepth: 2
 
     installing
+    intro
     commands
     rooms
 
