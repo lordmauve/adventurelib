@@ -22,6 +22,7 @@ Contents:
     intro
     commands
     rooms
+    customising
 
 
 Indices and tables
