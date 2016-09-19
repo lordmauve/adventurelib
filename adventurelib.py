@@ -2,6 +2,7 @@ import re
 import sys
 import inspect
 import readline
+from copy import deepcopy
 from functools import partial
 from itertools import zip_longest
 
@@ -12,7 +13,9 @@ commands = [
 __all__ = (
     'when',
     'start',
-    'Room'
+    'Room',
+    'Item',
+    'Bag',
 )
 
 
@@ -54,6 +57,11 @@ class Room:
     def __init__(self, description):
         self.description = description.strip()
 
+        # Copy class Bags to instance variables
+        for k, v in vars(type(self)).items():
+            if isinstance(v, Bag):
+                setattr(self, k, deepcopy(v))
+
     def __str__(self):
         return self.description
 
@@ -87,6 +95,63 @@ class Room:
 
 Room.add_direction('north', 'south')
 Room.add_direction('east', 'west')
+
+
+class Item:
+    """A generic item object that can be referred to by a number of names."""
+
+    def __init__(self, name, *aliases):
+        self.name = name
+        self.aliases = (name,) + aliases
+
+    def __repr__(self):
+        return '%s(%s)' % (
+            type(self).__name__,
+            ', '.join(repr(n) for n in self.aliases)
+        )
+
+    def __str__(self):
+        return self.name
+
+
+class Bag(set):
+    """A collection of Items, such as in an inventory.
+
+    Behaves very much like a set, but the 'in' operation is overloaded to
+    accept a str item name, and there is a ``take()`` method to remove an item
+    by name.
+
+    """
+    def _find(self, name):
+        for item in self:
+            if name in item.aliases:
+                return item
+        return None
+
+    def __contains__(self, v):
+        """Return True if an Item is present in the bag.
+
+        If v is a str, then find the item by name, otherwise find the item by
+        identity.
+
+        """
+        if isinstance(v, str):
+            return bool(self._find(v))
+        else:
+            return set.__contains__(v)
+
+    def take(self, name):
+        """Remove an Item from the bag if it is present.
+
+        If multiple names match, then return one of them.
+
+        Return None if no item matches the name.
+
+        """
+        obj = self._find(name)
+        if obj is not None:
+            self.remove(obj)
+        return obj
 
 
 def _register(command, func, kwargs={}):
