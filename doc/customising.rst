@@ -44,7 +44,7 @@ To customise the prompt, write a function that returns what the prompt string
 should be. Usually it should end with a space. Then assign this function as
 ``adventurelib.prompt`` like this::
 
-    import adventurelib  # You could put this at the top of the file
+    import adventurelib  # Put this at the top of the file
 
     def prompt():
         return '{hp}HP > '.format(hp=player_hp)
@@ -80,17 +80,17 @@ function, adventurelib responds with a basic "I don't understand" message::
 
 This could get very boring if users see it a lot!
 
-To customise this, write a function and set it as
+To customise this, write a function and assign it as
 ``adventurelib.no_command_matches``. This function should accept the input the
 player typed as its argument, and print any responses::
 
-    import adventurelib  # You could put this at the top of the file
+    import adventurelib  # Put this at the top of the file
 
     def no_command_matches(command):
         print(random.choice([
             'Huh?',
             'Sorry?',
             'I beg your pardon?'
-        ])
+        ]))
 
     adventurelib.no_command_matches = no_command_matches

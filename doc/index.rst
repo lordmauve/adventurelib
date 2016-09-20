@@ -22,6 +22,7 @@ Contents:
     intro
     commands
     rooms
+    items
     customising
 
 

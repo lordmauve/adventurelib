@@ -122,7 +122,12 @@ class Bag(set):
     by name.
 
     """
-    def _find(self, name):
+    def find(self, name):
+        """Find an object in the bag by name, but do not remove it.
+
+        Return None if the name does not match.
+
+        """
         for item in self:
             if name in item.aliases:
                 return item
@@ -136,7 +141,7 @@ class Bag(set):
 
         """
         if isinstance(v, str):
-            return bool(self._find(v))
+            return bool(self.find(v))
         else:
             return set.__contains__(v)
 
