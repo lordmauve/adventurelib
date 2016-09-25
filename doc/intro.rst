@@ -75,6 +75,7 @@ Adventurelib can help with:
 
 * :doc:`Calling your code in response to player commands <commands>`
 * :doc:`Moving through interconnected locations <rooms>`
+* :doc:`Referring to items and characters by name <items>`
 
 ...but you're going to need to use those features to tell a story that players
 can interact with and get drawn into. You're going to have to write the Python

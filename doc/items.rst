@@ -25,7 +25,7 @@ be as follows:
     There is a broken broom here.
 
     > take broom
-    You take the broken broom.
+    You take the broom.
 
     > inventory
     You have:
@@ -77,10 +77,11 @@ when we're talking about some object out of a class of objects, and "the"
 when we're talking about a specific one or specific group.
 
 If you're not writing in English, you may have similar grammatical
-considerations.
+considerations - genders, word endings etc.
 
 You can store these variations on the name as attributes on the item for use in
-constructing grammatical sentences::
+constructing grammatical sentences - here we use ``def_name``, but use whatever
+attributes you like::
 
     apples = Item('some apples', 'apples', 'apple')
     apples.def_name = 'the apples'
@@ -93,6 +94,9 @@ constructing grammatical sentences::
         else:
             print('You take %s.' % item.def_name)
             inventory.add(obj)
+
+Making your sentences obey correct grammar in all case may not be easy - good
+luck!
 
 
 .. _bags:
