@@ -58,6 +58,12 @@ And then in game::
     You bellow at the top of your lungs.
 
 
+As with the case of what a player types, so too the spacing of what a player
+types doesn't matter::
+
+    >   shout        loudly
+    You bellow at the top of your lungs.
+
 All the words you want the player to type have to be in lower case letters.
 
 
@@ -108,7 +114,7 @@ Here are the rules for what you can write:
 
 
 Capturing multi-word names
------------------------------
+--------------------------
 
 An UPPERCASE name can match multiple words. If your code contains the above
 example::
@@ -161,11 +167,11 @@ would struggle to create puzzles that involve multiple variations on an object:
     a blue apple
 
     > feed red apple to water nymph
-    The nymph sticks out her tongue and shivers unenthusiastically
+    The nymph sticks out her tongue and shivers unenthusiastically.
 
     > feed blue apple to water nymph
-    The nymph's eyes widen as you take our the blue apple. She dashes
-    towards you and snatches it from your hands, then immediately
+    The nymph's eyes widen as you take out the blue apple. She dashes
+    towards you and snatches it from your hands, and then immediately
     turns and runs towards the small door.
 
     Glancing back towards you momentarily, she wordlessly tosses you
