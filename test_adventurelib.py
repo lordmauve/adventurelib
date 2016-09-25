@@ -1,5 +1,12 @@
-from adventurelib import Pattern
+import adventurelib
+from adventurelib import Pattern, when, _handle_command
 
+orig_commands = adventurelib.commands[:]
+
+
+def teardown():
+    """Reset the commands."""
+    adventurelib.commands[:] = orig_commands
 
 
 def test_match():
@@ -81,3 +88,38 @@ def test_word_combinations_4():
         (1, 2, 2),
         (1, 1, 3),
     ]
+
+
+def test_register():
+    called = False
+
+    @when('north')
+    def func():
+        nonlocal called
+        called = True
+
+    print(adventurelib.commands)
+    _handle_command('north')
+    assert called is True
+
+
+def test_register_args():
+    args = None
+
+    @when('north', dir='north')
+    def func(dir):
+        nonlocal args
+        args = [dir]
+    _handle_command('north')
+    assert args == ['north']
+
+
+def test_register_match():
+    args = None
+
+    @when('hit TARGET with WEAPON', verb='hit')
+    def func(target, weapon, verb):
+        nonlocal args
+        args = [target, weapon, verb]
+    _handle_command('hit dragon with glass sword')
+    assert args == ['dragon', 'glass sword', 'hit']

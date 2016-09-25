@@ -45,7 +45,7 @@ def drop(thing):
     if not obj:
         print('You do not have a %s.' % thing)
     else:
-        print('You drop the %s.' % thing)
+        print('You drop the %s.' % obj)
         current_room.items.add(obj)
 
 

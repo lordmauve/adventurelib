@@ -6,10 +6,6 @@ from copy import deepcopy
 from functools import partial
 from itertools import zip_longest
 
-commands = [
-    (('quit',), sys.exit, {}),  # quit command is built-in
-]
-
 __all__ = (
     'when',
     'start',
@@ -153,7 +149,7 @@ class Bag(set):
         Return None if no item matches the name.
 
         """
-        obj = self._find(name)
+        obj = self.find(name)
         if obj is not None:
             self.remove(obj)
         return obj
@@ -170,7 +166,7 @@ def _register(command, func, kwargs={}):
             'The function %s%s has the wrong signature for @when(%r)' % (
                 func.__name__, sig, command
             ) + '\n\nThe function arguments should be (%s)' % (
-                ', '.join(argnames + list(kwargs.keys()))
+                ', '.join(pattern.argnames + list(kwargs.keys()))
             )
         )
 
@@ -179,6 +175,7 @@ def _register(command, func, kwargs={}):
 
 class Pattern:
     def __init__(self, pattern):
+        self.orig_pattern = pattern
         words = pattern.split()
         match = []
         argnames = []
@@ -210,6 +207,12 @@ class Pattern:
             self.prefix.append(w)
         self.pattern = match[len(self.prefix):]
         self.fixed = len(self.pattern) - self.placeholders
+
+    def __repr__(self):
+        return '%s(%r)' % (
+            type(self).__name__,
+            self.orig_pattern
+        )
 
     @staticmethod
     def word_combinations(have, placeholders):
@@ -293,8 +296,24 @@ def when(command, **kwargs):
 def help():
     """Print a list of the commands you can give."""
     print('Here is a list of the commands you can give:')
-    for match, func, kwargs in sorted(commands):
-        print(' '.join(str(t) for t in match))
+    cmds = sorted(c.orig_pattern for c, _, _ in commands)
+    for c in cmds:
+        print(c)
+
+
+def _handle_command(cmd):
+    """Handle a command typed by the user."""
+    ws = cmd.lower().split()
+    for pattern, func, kwargs in commands:
+        args = kwargs.copy()
+        matches = pattern.match(ws)
+        if matches is not None:
+            args.update(matches)
+            func(**args)
+            break
+    else:
+        no_command_matches(cmd)
+    print()
 
 
 def start(help=True):
@@ -302,8 +321,11 @@ def start(help=True):
     if help:
         # Ugly, but we want to keep the arguments consistent
         help = globals()['help']
-        commands.insert(0, (('help',), help, {}))
-        commands.insert(0, (('?',), help, {}))
+        qmark = Pattern('help')
+        qmark.prefix = ['?']
+        qmark.orig_pattern = '?'
+        commands.insert(0, (Pattern('help'), help, {}))
+        commands.insert(0, (qmark, help, {}))
     while True:
         try:
             cmd = input(prompt()).strip()
@@ -314,16 +336,9 @@ def start(help=True):
         if not cmd:
             continue
 
-        ws = tuple(cmd.lower().split())
-        for pattern, func, kwargs in commands:
-            args = kwargs.copy()
-            matches = _match(ws, pattern)
-            if matches is not None:
-                args.update(matches)
-                func(**args)
-                break
-        else:
-            no_command_matches(cmd)
-        print()
+        _handle_command(cmd)
 
 
+commands = [
+    (Pattern('quit'), sys.exit, {}),  # quit command is built-in
+]
