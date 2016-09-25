@@ -161,31 +161,10 @@ class Bag(set):
 
 def _register(command, func, kwargs={}):
     """Register func as a handler for the given command."""
-    words = command.split()
-    match = []
-    argnames = []
-    for w in words:
-        if not w.isalpha():
-            raise InvalidCommand(
-                'Invalid command %r' % command +
-                'Commands may consist of letters only.'
-            )
-        if w.isupper():
-            arg = w.lower()
-            argnames.append(arg)
-            match.append(Placeholder(arg))
-        elif w.islower():
-            match.append(w)
-        else:
-            raise InvalidCommand(
-                'Invalid command %r' % command +
-                '\n\nWords in commands must either be in lowercase or ' +
-                'capitals, not a mix.'
-            )
-
+    pattern = Pattern(command)
     sig = inspect.signature(func)
     func_argnames = set(sig.parameters)
-    when_argnames = set(argnames) | set(kwargs.keys())
+    when_argnames = set(pattern.argnames) | set(kwargs.keys())
     if func_argnames != when_argnames:
         raise InvalidCommand(
             'The function %s%s has the wrong signature for @when(%r)' % (
@@ -195,7 +174,102 @@ def _register(command, func, kwargs={}):
             )
         )
 
-    commands.append((tuple(match), func, kwargs))
+    commands.append((pattern, func, kwargs))
+
+
+class Pattern:
+    def __init__(self, pattern):
+        words = pattern.split()
+        match = []
+        argnames = []
+        self.placeholders = 0
+        for w in words:
+            if not w.isalpha():
+                raise InvalidCommand(
+                    'Invalid command %r' % command +
+                    'Commands may consist of letters only.'
+                )
+            if w.isupper():
+                arg = w.lower()
+                argnames.append(arg)
+                match.append(Placeholder(arg))
+                self.placeholders += 1
+            elif w.islower():
+                match.append(w)
+            else:
+                raise InvalidCommand(
+                    'Invalid command %r' % command +
+                    '\n\nWords in commands must either be in lowercase or ' +
+                    'capitals, not a mix.'
+                )
+        self.argnames = argnames
+        self.prefix = []
+        for w in match:
+            if isinstance(w, Placeholder):
+                break
+            self.prefix.append(w)
+        self.pattern = match[len(self.prefix):]
+        self.fixed = len(self.pattern) - self.placeholders
+
+    @staticmethod
+    def word_combinations(have, placeholders):
+        if have < placeholders:
+            return
+        if have == placeholders:
+            yield (1,) * placeholders
+            return
+        if placeholders == 1:
+            yield (have,)
+            return
+
+        # Greedy - start by taking everything
+        other_groups = placeholders - 1
+        take = have - other_groups
+        while take > 0:
+            remain = have - take
+            if have >= placeholders - 1:
+                combos = Pattern.word_combinations(remain, other_groups)
+                for buckets in combos:
+                    yield (take,) + tuple(buckets)
+            take -= 1 # backtrack
+
+    def match(self, input_words):
+        if len(input_words) < len(self.argnames):
+            return None
+
+        if input_words[:len(self.prefix)] != self.prefix:
+            return None
+
+        input_words = input_words[len(self.prefix):]
+
+        if not input_words:
+            if self.pattern:
+                return None
+            return {}
+
+        have = len(input_words) - self.fixed
+
+        for combo in self.word_combinations(have, self.placeholders):
+            matches = {}
+            take = iter(combo)
+            inp = iter(input_words)
+            try:
+                for cword in self.pattern:
+                    if isinstance(cword, Placeholder):
+                        count = next(take)
+                        ws = []
+                        for _ in range(count):
+                            ws.append(next(inp))
+                        matches[cword.name] = ws
+                    else:
+                        word = next(inp)
+                        if cword != word:
+                            break
+                else:
+                    return {k: ' '.join(v) for k, v in matches.items()}
+            except StopIteration:
+                continue
+        return None
 
 
 def prompt():
@@ -241,16 +315,11 @@ def start(help=True):
             continue
 
         ws = tuple(cmd.lower().split())
-        for match, func, kwargs in commands:
+        for pattern, func, kwargs in commands:
             args = kwargs.copy()
-            for cword, word in zip_longest(match, ws):
-                if word is None:
-                    break
-                if isinstance(cword, Placeholder):
-                    args[cword.name] = word
-                elif cword != word:
-                    break
-            else:
+            matches = _match(ws, pattern)
+            if matches is not None:
+                args.update(matches)
                 func(**args)
                 break
         else:

@@ -8,17 +8,20 @@ a character.
 To support this, adventurelib provides two classes that work together: ``Item``
 and ``Bag``.
 
-Item
-----
+Defining an item
+----------------
 
 The ``Item`` class represents an item. The most important feature is that items
 can be referred to by a number of names. This means that you can use a
 descriptive name for the item in output that you show to the user, but allow
 the user to refer to the item by a shorter name. In game, the interaction might
-be as follows::
+be as follows:
+
+.. code-block:: none
 
     > look
-    You are in a dirt-stained and litter-strewn alley behind the cinema.
+    You are in a dirt-stained and litter-strewn alley behind
+    the cinema.
     There is a broken broom here.
 
     > take broom
@@ -30,7 +33,15 @@ be as follows::
 
 To represent an object like this in the game, construct an Item object::
 
-    broom = Item('broken broom', 'broom')
+    broom = Item('a broken broom', 'broom')
+
+The first name you give is the default name for the item, which can be inserted
+into strings::
+
+    print('You sweep away cobwebs with %s.' % broom)
+
+All the other names you give are *aliases* for the object. See :ref:`bags` for
+how to select items based on what the player types.
 
 
 Item Attributes
@@ -72,7 +83,7 @@ You can store these variations on the name as attributes on the item for use in
 constructing grammatical sentences::
 
     apples = Item('some apples', 'apples', 'apple')
-    apples.definite = 'the apples'
+    apples.def_name = 'the apples'
 
     @when('take ITEM')
     def take_item(item):
@@ -80,12 +91,14 @@ constructing grammatical sentences::
         if not obj:
             print('There is no %s here.' % item)
         else:
-            print('You take %s.' % item.definite
+            print('You take %s.' % item.def_name)
             inventory.add(obj)
 
 
-Bag
----
+.. _bags:
+
+Bags of items
+-------------
 
 A ``Bag`` is a collection of items. This does not need to be a literal "bag"
 that the player is holding - it's a metaphor! You could treat a Room as being
@@ -142,7 +155,6 @@ So, you could model the player's inventory as a Bag::
         else:
             print('You eat the %s.' % obj)
 
-
     @when('inventory')
     def show_inventory():
         print('You have:')
@@ -158,7 +170,6 @@ You could also model the items on the ground in a room as a bag::
     chapel.items = Bag([
         Item('a golden candlestick', 'candlestick'),
     ])
-
 
     @when('take ITEM')
     def take(item):
@@ -181,7 +192,7 @@ You might want to store pronouns for the characters as attributes on the Item
 object for use in constructing grammatical sentences::
 
     wizard = Item('a wizard')
-    wizard.definite = 'the wizard'
+    wizard.def_name = 'the wizard'
     wizard.subject_pronoun = 'he'
     wizard.object_pronoun = 'him'
 
@@ -196,4 +207,4 @@ of Items that share common attributes)::
 Then the above example can be written just as::
 
     wizard = MaleCharacter('a wizard')
-    wizard.definite = 'the wizard'
+    wizard.def_name = 'the wizard'

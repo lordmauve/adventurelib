@@ -107,6 +107,80 @@ Here are the rules for what you can write:
   be converted to lower case.
 
 
+Capturing multi-word names
+-----------------------------
+
+An UPPERCASE name can match multiple words. If your code contains the above
+example::
+
+    @when("give ITEM to RECIPIENT")
+
+Then a player can type:
+
+.. code-block:: none
+
+    > give poison apple to evil godmother
+
+And your code will receive the values::
+
+    item = "poison apple"
+    recipient = "evil godmother"
+
+As long as you require players to type some command words between ``ITEM`` and
+``RECIPIENT`` (``to`` in this case), this will do what you expect.  But beware
+of providing a shorter alias::
+
+    @when("give ITEM RECIPIENT")
+
+Adventurelib uses what's called a **greedy algorithm** - "greedy", because the
+first group will hungrily "eat" as many words as it can. If a player typed:
+
+.. code-block:: none
+
+    > give poison apple evil godmother
+
+Then ``ITEM`` will "eat" the first three words, and your code will receive the
+values::
+
+    item = "poison apple evil"
+    recipient = "godmother"
+
+Which is probably not what you expect!
+
+However, each CAPITALISED word will match at least one word. So ``give apple
+godmother`` will do what you expect. Therefore one solution is to make sure
+every object in the game can be referred to by a single-word name like
+``apple``. This can work well in simple games, but the drawback is that you
+would struggle to create puzzles that involve multiple variations on an object:
+
+.. code-block:: none
+
+    > inventory
+    You have:
+    a red apple
+    a blue apple
+
+    > feed red apple to water nymph
+    The nymph sticks out her tongue and shivers unenthusiastically
+
+    > feed blue apple to water nymph
+    The nymph's eyes widen as you take our the blue apple. She dashes
+    towards you and snatches it from your hands, then immediately
+    turns and runs towards the small door.
+
+    Glancing back towards you momentarily, she wordlessly tosses you
+    a slender, silver-blue key, and a moment later is gone.
+
+It is probably best to require words like ``to``, ``with`` and ``on``, so that
+adventurelib knows how to split up a phrase::
+
+   @when('give ITEM to RECIPIENT')
+
+   @when('use ITEM on TARGET')
+
+   @when('hit TARGET with WEAPON')
+
+
 Additional parameters to commands
 ---------------------------------
 
