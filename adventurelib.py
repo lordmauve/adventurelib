@@ -102,7 +102,7 @@ class Item:
 
     def __init__(self, name, *aliases):
         self.name = name
-        self.aliases = (name,) + aliases
+        self.aliases = (name.lower(),) + aliases
 
     def __repr__(self):
         return '%s(%s)' % (
