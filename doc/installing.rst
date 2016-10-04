@@ -14,6 +14,9 @@ to simply type (at a command prompt)::
 Single file
 -----------
 
-adventurelib is a single file. If you download the package from PyPI or browse
-the project on GitHub, ``adventurelib.py`` is all you need. You can save this
+adventurelib is a single file. If you download the package from PyPI_ or browse
+the project on GitHub_, ``adventurelib.py`` is all you need. You can save this
 file alongside your game script and use it directly.
+
+.. _PyPI: https://pypi.python.org/pypi/adventurelib
+.. _GitHub: https://github.com/lordmauve/adventurelib

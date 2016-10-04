@@ -18,10 +18,10 @@ themselves as they explore Python programming concepts.
 
 ## Installing
 
-adventurelib.py is a single file that can be copied into your project. You can
-also install it with pip:
+`adventurelib.py` is a single file that can be copied into your project. You
+can also install it with pip:
 
-    $ pip install adventurelib
+    pip install adventurelib
 
 
 ## Documentation

@@ -185,7 +185,7 @@ You could also model the items on the ground in a room as a bag::
             print('You take the %s.' % obj)
 
 
-.. characters:
+.. _characters:
 
 Characters
 ----------
