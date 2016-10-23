@@ -2,9 +2,18 @@ import re
 import sys
 import inspect
 import readline
+import textwrap
 from copy import deepcopy
 from functools import partial
 from itertools import zip_longest
+try:
+    from shutil import get_terminal_size
+except ImportError:
+    from backports.shutil_get_terminal_size import get_terminal_size
+else:
+    def get_terminal_size(fallback=(80, 24)):
+        return fallback
+
 
 __all__ = (
     'when',
@@ -12,6 +21,7 @@ __all__ = (
     'Room',
     'Item',
     'Bag',
+    'say',
 )
 
 
@@ -337,6 +347,23 @@ def start(help=True):
             continue
 
         _handle_command(cmd)
+
+
+def say(msg):
+    """Print a message.
+
+    Unlike print(), this deals with de-denting and wrapping of text to fit
+    within the width of the terminal.
+
+    Paragraphs separated by blank lines in the input will be wrapped
+    separately.
+
+    """
+    msg = str(msg)
+    width = get_terminal_size()[0]
+    paragraphs = re.split(r'\n(?:[ \t]*\n)', msg)
+    formatted = (textwrap.fill(p.strip(), width=width) for p in paragraphs)
+    print('\n\n'.join(formatted))
 
 
 commands = [

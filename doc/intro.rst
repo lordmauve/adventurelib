@@ -54,16 +54,85 @@ command::
 
     @when("brush teeth")
     def brush_teeth():
-        print(
-            "You squirt a bit too much toothpaste onto your " +
-            "brush and dozily jiggle it round your mouth a bit."
-        )
+        print("You brush your teeth. They feel clean.")
 
 If you start the game again you can try out the new command::
 
     > brush teeth
-    You squirt a bit too much toothpaste onto your brush and dozily jiggle it
-    round your mouth a bit.
+    You brush your teeth. They feel clean.
+
+
+Using long text
+---------------
+
+Writing rich, descriptive text is your main tool for getting a player to feel
+immersed in your game.
+
+While Python's built-in ``print()`` function is useful for displaying output
+to a user, it is a bit unwieldy when you want to write several lines of text
+at once. You could write your descriptions like this, using ``+`` to glue
+together individual strings::
+
+    @when("brush teeth")
+    def brush_teeth():
+        print(
+            "You squirt a bit too much toothpaste onto your " +
+            "brush and dozily jiggle it round your mouth."
+        )
+
+This can be inconvenient and harder to make changes to. Adventurelib provides a
+convenience function called ``say()`` that you can use instead to show longer
+strings of text to the player. It's intended to be used with triple-quoted
+strings like this::
+
+    @when("brush teeth")
+    def brush_teeth():
+        say("""
+            You squirt a bit too much toothpaste onto your
+            brush and dozily jiggle it round your mouth.
+        """)
+
+This will clean up the spacing of the string, then wrap the output to the width
+of the player's screen.
+
+.. code-block:: none
+
+    > brush teeth
+    You squirt a bit too much toothpaste onto
+    your brush and dozily jiggle it round
+    your mouth.
+
+It also supports multiple paragraphs of text, separated by blank lines::
+
+    @when("brush teeth")
+    def brush_teeth():
+        say("""
+            You squirt a bit too much toothpaste onto your
+            brush and dozily jiggle it round your mouth.
+
+            Your teeth feel clean and shiny now, as you
+            run your tongue over them.
+        """)
+
+.. code-block:: none
+
+    > brush teeth
+    You squirt a bit too much toothpaste onto
+    your brush and dozily jiggle it round
+    your mouth.
+
+    Your teeth feel clean and shiny now, as
+    you run your tongue over them.
+
+You do not have to use ``say()`` over ``print()``:
+
+* ``print()`` will preserve the formatting of the strings you give it. This is
+  sometimes needed; for example, to show a pre-formatted poem, or to display
+  `ASCII art`_.
+* Use ``say()`` to make it easier to output prose, in a way that will be
+  easier for the player to read.
+
+.. _`ASCII art`: https://en.wikipedia.org/wiki/ASCII_art
 
 Be creative
 -----------

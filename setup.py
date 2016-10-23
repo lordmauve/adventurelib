@@ -1,5 +1,15 @@
 from setuptools import setup
 
+requirements = []
+
+
+try:
+    from shutil import get_terminal_size
+except ImportError:
+    requirements.append(
+        'backports.shutil_get_terminal_size',
+    )
+
 
 setup(
     name='adventurelib',
@@ -9,6 +19,7 @@ setup(
     author_email='mauve@mauveweb.co.uk',
     url='https://adventurelib.readthedocs.io/',
     py_modules=['adventurelib'],
+    install_requires=requirements,
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Education',

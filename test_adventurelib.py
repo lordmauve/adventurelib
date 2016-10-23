@@ -1,5 +1,10 @@
+import os
+from unittest.mock import patch
+from contextlib import redirect_stdout
+from io import StringIO
+
 import adventurelib
-from adventurelib import Pattern, when, _handle_command
+from adventurelib import Pattern, when, _handle_command, say, Room
 
 orig_commands = adventurelib.commands[:]
 
@@ -123,3 +128,63 @@ def test_register_match():
         args = [target, weapon, verb]
     _handle_command('hit dragon with glass sword')
     assert args == ['dragon', 'glass sword', 'hit']
+
+
+def say_at_width(width, msg):
+    buf = StringIO()
+    with patch('adventurelib.get_terminal_size', return_value=(width, 24)):
+        with redirect_stdout(buf):
+            say(msg)
+    return buf.getvalue()
+
+
+def test_say_room():
+    """saw() will format input as strings."""
+    r = Room('You are standing in a hallway.')
+
+    buf = StringIO()
+    with redirect_stdout(buf):
+        say(r)
+    assert buf.getvalue() == 'You are standing in a hallway.\n'
+
+
+def test_say_wrap():
+    """The say() function will print output wrapped to the terminal width."""
+    out = say_at_width(40, """
+    This is a long sentence that the say command will wrap.
+    """)
+
+    assert out == (
+        "This is a long sentence that the say\n"
+        "command will wrap.\n"
+    )
+
+
+def test_say_wrap2():
+    """The say() function will print output wrapped to the terminal width."""
+    out = say_at_width(20, """
+    This is a long sentence that the say command will wrap.
+    """)
+
+    assert out == (
+        "This is a long\n"
+        "sentence that the\n"
+        "say command will\n"
+        "wrap.\n"
+    )
+
+
+def test_say_paragraph():
+    out = say_at_width(40, """
+    This is a long sentence that the say command will wrap.
+
+    And this is a second paragraph that is separately wrapped.
+    """)
+
+    assert out == (
+        "This is a long sentence that the say\n"
+        "command will wrap.\n"
+        "\n"
+        "And this is a second paragraph that is\n"
+        "separately wrapped.\n"
+    )
