@@ -4,7 +4,7 @@ from contextlib import redirect_stdout
 from io import StringIO
 
 import adventurelib
-from adventurelib import Pattern, when, _handle_command, say, Room
+from adventurelib import Pattern, when, _handle_command, say, Room, Item, Bag
 
 orig_commands = adventurelib.commands[:]
 
@@ -188,3 +188,17 @@ def test_say_paragraph():
         "And this is a second paragraph that is\n"
         "separately wrapped.\n"
     )
+
+
+def test_bag_find():
+    name, *aliases = ['Name', 'UPPER ALIAS', 'lower alias']
+    bag = Bag({
+        Item(name, *aliases)
+    })
+
+    assert bag.find('name')
+    assert bag.find('Name')
+    assert bag.find('NAME')
+    assert bag.find('upper alias')
+    assert bag.find('LOWER ALIAS')
+    assert not bag.find('other')
