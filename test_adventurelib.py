@@ -4,7 +4,7 @@ from contextlib import redirect_stdout
 from io import StringIO
 
 import adventurelib
-from adventurelib import Pattern, when, _handle_command, say, Room
+from adventurelib import Pattern, when, _handle_command, say, Room, Bag
 
 orig_commands = adventurelib.commands[:]
 
@@ -188,3 +188,35 @@ def test_say_paragraph():
         "And this is a second paragraph that is\n"
         "separately wrapped.\n"
     )
+
+
+@patch('random.randrange', return_value=0)
+def test_bag_get_random(randrange):
+    """We can select an item from a bag at random."""
+    bag = Bag(['a', 'b', 'c'])
+    assert bag.get_random() == list(bag)[0]
+    randrange.assert_called_once_with(3)
+
+
+@patch('random.randrange', return_value=1)
+def test_bag_get_random2(randrange):
+    """We can select an item from a bag at random."""
+    bag = Bag(['a', 'b', 'c'])
+    assert bag.get_random() == list(bag)[1]
+    randrange.assert_called_once_with(3)
+
+
+def test_empty_bag_get_random():
+    """Choosing from an empty bag returns None."""
+    bag = Bag()
+    assert bag.get_random() is None
+
+
+@patch('random.randrange', return_value=0)
+def test_bag_take_random(randrange):
+    """We can select and remove an item from a bag at random."""
+    bag = Bag(['a', 'b', 'c'])
+    items = list(bag)
+    assert bag.take_random() == items[0]
+    assert bag == Bag(items[1:])
+    randrange.assert_called_once_with(3)

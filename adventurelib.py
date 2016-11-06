@@ -3,6 +3,7 @@ import sys
 import inspect
 import readline
 import textwrap
+import random
 from copy import deepcopy
 from functools import partial
 from itertools import zip_longest
@@ -160,6 +161,30 @@ class Bag(set):
 
         """
         obj = self.find(name)
+        if obj is not None:
+            self.remove(obj)
+        return obj
+
+    def get_random(self):
+        """Choose an Item from the bag at random, but don't remove it.
+
+        Return None if the bag is empty.
+
+        """
+        if not self:
+            return None
+        which = random.randrange(len(self))
+        for index, obj in enumerate(self):
+            if index == which:
+                return obj
+
+    def take_random(self):
+        """Remove an Item from the bag at random, and return it.
+
+        Return None if the bag is empty.
+
+        """
+        obj = self.get_random()
         if obj is not None:
             self.remove(obj)
         return obj

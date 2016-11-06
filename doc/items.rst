@@ -133,6 +133,15 @@ have typed for them. For this purpose, they have these methods:
 
     Returns ``None`` if the name didn't match any object in the bag.
 
+.. function:: bag.get_random()
+
+    Select and return one item from the bag at random, without removing it.
+
+.. function:: bag.take_random()
+
+    Remove and return one item from the bag at random.
+
+
 But Bags are also sets_ so they **inherit**  various methods for modifying and
 iterating over items in the Bag, most usefully:
 
