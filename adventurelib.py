@@ -109,7 +109,10 @@ class Item:
 
     def __init__(self, name, *aliases):
         self.name = name
-        self.aliases = (name.lower(),) + aliases
+        self.aliases = tuple(
+            label.lower()
+            for label in (name,) + aliases
+        )
 
     def __repr__(self):
         return '%s(%s)' % (
@@ -136,7 +139,7 @@ class Bag(set):
 
         """
         for item in self:
-            if name in item.aliases:
+            if name.lower() in item.aliases:
                 return item
         return None
 
