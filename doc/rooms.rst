@@ -190,7 +190,7 @@ alias commands ``n``, ``s``, ``e`` and ``w`` as a convenience::
     @when('south', direction='south')
     @when('east', direction='east')
     @when('west', direction='west')
-    @when('n', direction='south')
+    @when('n', direction='north')
     @when('s', direction='south')
     @when('e', direction='east')
     @when('w', direction='west')
