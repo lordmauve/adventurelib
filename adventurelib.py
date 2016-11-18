@@ -283,10 +283,10 @@ class Pattern:
 
         input_words = input_words[len(self.prefix):]
 
-        if not input_words:
-            if self.pattern:
-                return None
+        if not input_words and not self.pattern:
             return {}
+        if bool(input_words) != bool(self.pattern):
+            return None
 
         have = len(input_words) - self.fixed
 

@@ -19,6 +19,16 @@ def test_match():
     assert matches == {}
 
 
+def test_no_match_different_words():
+    matches = Pattern('look').match(['apple'])
+    assert matches is None
+
+
+def test_no_match_extra_words():
+    matches = Pattern('look').match(['look', 'at', 'butler'])
+    assert matches is None
+
+
 def test_multiple_words():
     pat = Pattern('take apple')
     matches = pat.match(['take', 'apple'])
