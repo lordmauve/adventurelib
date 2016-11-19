@@ -24,6 +24,7 @@ Contents:
     rooms
     items
     customising
+    changelog
 
 
 Indices and tables
