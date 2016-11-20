@@ -200,6 +200,19 @@ def test_say_paragraph():
     )
 
 
+def test_say_paragraph():
+    out = say_at_width(40, """
+    This is a long sentence that the say command will wrap,
+    and this clause is indented to match.
+    """)
+
+    assert out == (
+        "This is a long sentence that the say\n"
+        "command will wrap, and this clause is\n"
+        "indented to match.\n"
+    )
+
+
 @patch('random.randrange', return_value=0)
 def test_bag_get_random(randrange):
     """We can select an item from a bag at random."""

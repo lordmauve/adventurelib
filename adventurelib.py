@@ -388,6 +388,7 @@ def say(msg):
 
     """
     msg = str(msg)
+    msg = re.sub(r'^[ \t]*(.*?)[ \t]*$', r'\1', msg, flags=re.M)
     width = get_terminal_size()[0]
     paragraphs = re.split(r'\n(?:[ \t]*\n)', msg)
     formatted = (textwrap.fill(p.strip(), width=width) for p in paragraphs)

@@ -1,9 +1,13 @@
 Release History
 ===============
 
+1.1.1 - upcoming
+----------------
+
+* Fix: ``say()`` function does not dedent before wrapping text.
 
 1.1 - 2016-11-20
-----------------------
+----------------
 
 * New: ``say()`` function that eliminates formatting problems in printing
   multi-line prose.
