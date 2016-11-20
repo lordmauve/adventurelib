@@ -6,34 +6,42 @@ For teachers
 
 Adventurelib was created in response to requests from teachers for more
 resources to help teach programming concepts. However, many text-based
-adventure game frameworks would have preconceptions about how a text-based
-adventure game should work. They might assume items and inventories, rooms and
-items, non-player characters (known as NPCs) or more.
+adventure game frameworks impose preconceptions about how a text-based
+adventure game should work. They often assume items and inventories, rooms and
+items, non-player characters (known as NPCs) or more, and producing a game
+using these "engines" becomes less a matter of programming and more of
+producing the content.
 
-Adventurelib provides limited support for these, as I believe it is more
-instructive to learn how to create these structures oneself.
+Adventurelib deliberately provides only limited support for rooms, items and so
+on, as I believe it is more instructive to learn how to create these structures
+oneself.
 
-Consequently, programming with adventurelib seems to bring up very different
-material to programming graphical games. These problems are partly in the
-domain of computer science - how to model game state and produce business logic
-- and partly in the domain of English - such as how to construct grammatical
+Programming with adventurelib seems to bring up very different material to
+programming graphical games. The challenges are partly in the domain of
+computer science - how to model game state and produce business logic - and
+partly in the domain of English - such as how to construct grammatical
 sentences from fragments.
 
 These topics must be tackled:
 
-* Naming - the difference between an object and a name that may be used to
-  refer to that object.
-* References - ie. how one an object may hold references to other objects, or
-  to itself, and how manipulation of these references is the essence of
-  changing program state.
+* Naming/identity - the difference between an object and a name that may be
+  used to refer to that object.
+* References - how an object may hold references to other objects, or
+  to itself, and how traversal and manipulation of these references is the
+  essence of producing game logic.
 * Sets - Bags are sets of items, so membership in a set, set intersection,
   union and difference, are very useful.
 * Parts of speech such as pronouns and articles; pluralisation; sentence case.
 * Writing imaginative, engaging content.
 
+I think of these as somewhat more difficult topics than those that come up in
+writing graphical games, and I would therefore suggest teaching `Pygame Zero`_
+or some other graphical games library earlier.
+
 If you have feedback to offer having taught with adventurelib, please submit
 this using `the Github issues page`__.
 
+.. _`Pygame Zero`: https://pygame-zero.readthedocs.io/
 .. __: https://github.com/lordmauve/adventurelib/issues
 
 Non-English speakers
