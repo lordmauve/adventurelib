@@ -63,13 +63,13 @@ adventurelib will be anglophone. Here are the issues I can think of:
   word-by-word. This may not work for most ideographic/logographic languages.
 * The uppercase/lowercase of ``@when('take ITEM')`` will not be usable in
   languages without a concept of letter case.
-* ``north``, ``south``, ``east`` and ``west`` are built into the :doc:`Rooms`
+* ``north``, ``south``, ``east`` and ``west`` are built into the :doc:`rooms`
   system, though it is possible to add your own directions. Strictly, these
   are identifiers, and could be used with non-English commands, but the results
   of functions like ``room.exits()`` would need translation before display
   to the user.
 * No attention has been paid to RTL languages. For example the
-  :function:`say()` function may be broken for RTL languages, and the ``@when``
+  :ref:`say() <say>` function may be broken for RTL languages, and the ``@when``
   pattern matching is left-to-right greedy, so therefore appears ungreedy when
   considered right-to-left.
 

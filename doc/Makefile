@@ -226,4 +226,4 @@ dummy:
 
 
 livehtml:
-	sphinx-autobuild -b html -i \*~ -i \*.swp $(ALLSPHINXOPTS) $(BUILDDIR)/slides
+	sphinx-autobuild -b html -i \*~ -i \*.swp -i \*.swx $(ALLSPHINXOPTS) $(BUILDDIR)/slides

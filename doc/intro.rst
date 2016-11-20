@@ -62,6 +62,8 @@ If you start the game again you can try out the new command::
     You brush your teeth. They feel clean.
 
 
+.. _say:
+
 Using long text
 ---------------
 
