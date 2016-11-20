@@ -14,7 +14,7 @@ except ImportError:
 setup(
     name='adventurelib',
     description='Easy text adventures',
-    version='1.0',
+    version='1.1',
     author='Daniel Pope',
     author_email='mauve@mauveweb.co.uk',
     url='https://adventurelib.readthedocs.io/',

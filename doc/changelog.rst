@@ -2,7 +2,7 @@ Release History
 ===============
 
 
-1.1 - upcoming release
+1.1 - 2016-11-20
 ----------------------
 
 * New: ``say()`` function that eliminates formatting problems in printing
