@@ -169,7 +169,7 @@ to go.::
         room = current_room.exit(direction)
         if room:
             current_room = room
-            print('You go %s.' % direction)
+            print(f'You go {direction}.')
             look()
 
 

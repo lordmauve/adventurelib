@@ -38,7 +38,7 @@ To represent an object like this in the game, construct an Item object::
 The first name you give is the default name for the item, which can be inserted
 into strings::
 
-    print('You sweep away cobwebs with %s.' % broom)
+    print(f'You sweep away cobwebs with {broom}.')
 
 All the other names you give are *aliases* for the object. See :ref:`bags` for
 how to select items based on what the player types.
@@ -64,9 +64,9 @@ For example::
     def look(item):
         obj = inventory.find(item)
         if not item:
-            print("You do not have a %s." % item)
+            print(f"You do not have a {item}.")
         else:
-            print("It's a sort of %s-ish colour." % obj.colour)
+            print(f"It's a sort of {obj.colour}-ish colour.")
 
 
 Definite/indefinite articles
@@ -90,9 +90,9 @@ attributes you like::
     def take_item(item):
         obj = current_room.items.take(item)
         if not obj:
-            print('There is no %s here.' % item)
+            print(f'There is no {item} here.')
         else:
-            print('You take %s.' % item.def_name)
+            print(f'You take {item.def_name}.')
             inventory.add(obj)
 
 Making your sentences obey correct grammar in all case may not be easy - good
@@ -164,9 +164,9 @@ So, you could model the player's inventory as a Bag::
     def eat(item):
         obj = inventory.take(item)
         if not obj:
-            print('You do not have a %s.' % item)
+            print(f'You do not have a {item}.')
         else:
-            print('You eat the %s.' % obj)
+            print(f'You eat the {obj}.')
 
     @when('inventory')
     def show_inventory():
@@ -175,7 +175,7 @@ So, you could model the player's inventory as a Bag::
             print('nothing')
             return
         for item in inventory:
-            print('* %s' % item)
+            print(f'* {item}')
 
 
 You could also model the items on the ground in a room as a bag::
@@ -188,10 +188,10 @@ You could also model the items on the ground in a room as a bag::
     def take(item):
         obj = current_room.take(item)
         if not obj:
-            print('There is no %s here.' % item)
+            print(f'There is no {item} here.')
         else:
             inventory.add(item)
-            print('You take the %s.' % obj)
+            print(f'You take the {obj}.')
 
 
 .. _characters:

@@ -10,7 +10,7 @@ be called when the user types commands like "take hat"::
 
     @when('take THING')
     def take(thing):
-        print('You take the %s.' % thing)
+        print(f'You take the {thing}.')
         inventory.append(thing)
 
 Contents:

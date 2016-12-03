@@ -80,7 +80,7 @@ react to what it was they tried to take::
 
     @when("take THING")
     def take(thing):
-        print("You take the %s." % thing)
+        print(f"You take the {thing}.")
 
 So, in a game::
 
@@ -101,7 +101,7 @@ Here's another example, where we capture two words::
 
     @when("give ITEM to RECIPIENT")
     def give(item, recipient):
-        print("You give the %s to the %s." % (item, recipient))
+        print(f"You give the {item} to the {recipient}.")
 
 Here are the rules for what you can write:
 
@@ -203,7 +203,7 @@ For example::
     @when('yell', action='holler')
     @when('scream', action='shriek')
     def shout(action):
-        print('You %s loudly.' % action)
+        print(f'You {action} loudly.')
 
 
 Calling @when functions yourself
