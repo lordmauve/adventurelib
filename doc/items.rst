@@ -186,7 +186,7 @@ You could also model the items on the ground in a room as a bag::
 
     @when('take ITEM')
     def take(item):
-        obj = current_room.take(item)
+        obj = current_room.items.take(item)
         if not obj:
             print(f'There is no {item} here.')
         else:
