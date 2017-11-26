@@ -219,7 +219,7 @@ commands, such as when you enter a room:
 .. code-block:: python
     :emphasize-lines: 11
 
-    @when('look'):
+    @when('look')
     def look():
         print(current_room)
 
