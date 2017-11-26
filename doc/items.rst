@@ -190,7 +190,7 @@ You could also model the items on the ground in a room as a bag::
         if not obj:
             print(f'There is no {item} here.')
         else:
-            inventory.add(item)
+            inventory.add(obj)
             print(f'You take the {obj}.')
 
 
