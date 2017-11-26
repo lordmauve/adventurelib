@@ -7,6 +7,8 @@ adventurelib.
 Starting a project
 ------------------
 
+Your text adventure will be run from a single python file. Create a new plain text file (we'll call it my_game.py) and open it in your favorite editor. 
+
 The first thing you'll need to do is import the good stuff from adventurelib::
 
     from adventurelib import *
@@ -49,14 +51,14 @@ All of the rest of your code should go in between the ``from adventurelib
 import *`` and the ``start()`` lines.
 
 We can use the :doc:`@when <commands>` syntax to create a command that player
-can type in order to interact with your game. Let's add a ``brush teeth``
+can type in order to interact with your game. Opening your file once again, let's add a ``brush teeth``
 command::
 
     @when("brush teeth")
     def brush_teeth():
         print("You brush your teeth. They feel clean.")
 
-If you start the game again you can try out the new command::
+Once you have added this to your my_game.py file, save your changes and exit the editor. If you start the game again you can try out the new command::
 
     > brush teeth
     You brush your teeth. They feel clean.
