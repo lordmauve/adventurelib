@@ -1,0 +1,16 @@
+# Config file for automatic testing at travis-ci.org
+
+language: python
+python: 3.6
+
+env:
+  - TOXENV=py36
+  - TOXENV=py35
+  - TOXENV=py34
+  - TOXENV=flake8
+
+# Install tox; this is used to run tests under multiple interpreters
+install: pip install -U tox
+
+# in each Travis 'env' delegate to one tox 'testenv'
+script: tox -e ${TOXENV}
