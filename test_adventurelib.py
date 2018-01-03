@@ -1,4 +1,3 @@
-import os
 from unittest.mock import patch
 from contextlib import redirect_stdout
 from io import StringIO
@@ -122,9 +121,9 @@ def test_register_args():
     args = None
 
     @when('north', dir='north')
-    def func(dir):
+    def func(direc):
         nonlocal args
-        args = [dir]
+        args = [direc]
     _handle_command('north')
     assert args == ['north']
 
@@ -186,30 +185,19 @@ def test_say_wrap2():
 
 def test_say_paragraph():
     out = say_at_width(40, """
-    This is a long sentence that the say command will wrap.
+    This is a long sentence that the say command will wrap,
+    and this clause is indented to match.
 
     And this is a second paragraph that is separately wrapped.
     """)
 
     assert out == (
         "This is a long sentence that the say\n"
-        "command will wrap.\n"
+        "command will wrap, and this clause is\n"
+        "indented to match.\n"
         "\n"
         "And this is a second paragraph that is\n"
         "separately wrapped.\n"
-    )
-
-
-def test_say_paragraph():
-    out = say_at_width(40, """
-    This is a long sentence that the say command will wrap,
-    and this clause is indented to match.
-    """)
-
-    assert out == (
-        "This is a long sentence that the say\n"
-        "command will wrap, and this clause is\n"
-        "indented to match.\n"
     )
 
 
