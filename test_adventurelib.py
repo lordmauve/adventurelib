@@ -1,4 +1,3 @@
-import os
 from unittest.mock import patch
 from contextlib import redirect_stdout
 from io import StringIO
@@ -184,7 +183,8 @@ def test_say_wrap2():
     )
 
 
-def test_say_paragraph():
+def test_say_multiple_paragraph():
+    """Paragraphs separated by a blank line will be wrapped separately."""
     out = say_at_width(40, """
     This is a long sentence that the say command will wrap.
 
@@ -200,7 +200,8 @@ def test_say_paragraph():
     )
 
 
-def test_say_paragraph():
+def test_say_multiline_paragraph():
+    """We can wrap a sentence written in multiple input lines."""
     out = say_at_width(40, """
     This is a long sentence that the say command will wrap,
     and this clause is indented to match.

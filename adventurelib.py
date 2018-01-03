@@ -1,19 +1,18 @@
 import re
 import sys
 import inspect
-import readline
+import readline  # noqa: adds readline semantics to input()
 import textwrap
 import random
 from copy import deepcopy
-from functools import partial
-from itertools import zip_longest
 try:
     from shutil import get_terminal_size
 except ImportError:
-    from backports.shutil_get_terminal_size import get_terminal_size
-else:
-    def get_terminal_size(fallback=(80, 24)):
-        return fallback
+    try:
+        from backports.shutil_get_terminal_size import get_terminal_size
+    except ImportError:
+        def get_terminal_size(fallback=(80, 24)):
+            return fallback
 
 
 __all__ = (
@@ -28,6 +27,10 @@ __all__ = (
 
 class InvalidCommand(Exception):
     """A command is not defined correctly."""
+
+
+class InvalidDirection(Exception):
+    """The direction specified was not pre-declared."""
 
 
 class Placeholder:
@@ -99,6 +102,7 @@ class Room:
             object.__setattr__(value, reverse, self)
         else:
             object.__setattr__(self, name, value)
+
 
 Room.add_direction('north', 'south')
 Room.add_direction('east', 'west')
@@ -212,6 +216,13 @@ def _register(command, func, kwargs={}):
 
 
 class Pattern:
+    """A pattern for matching a command.
+
+    Patterns are defined with a string like 'take ITEM' which corresponds to
+    matching 'take' exactly followed by capturing one or more words as the
+    group named 'item'.
+    """
+
     def __init__(self, pattern):
         self.orig_pattern = pattern
         words = pattern.split()
@@ -221,7 +232,7 @@ class Pattern:
         for w in words:
             if not w.isalpha():
                 raise InvalidCommand(
-                    'Invalid command %r' % command +
+                    'Invalid command %r' % pattern +
                     'Commands may consist of letters only.'
                 )
             if w.isupper():
@@ -233,7 +244,7 @@ class Pattern:
                 match.append(w)
             else:
                 raise InvalidCommand(
-                    'Invalid command %r' % command +
+                    'Invalid command %r' % pattern +
                     '\n\nWords in commands must either be in lowercase or ' +
                     'capitals, not a mix.'
                 )
@@ -254,6 +265,15 @@ class Pattern:
 
     @staticmethod
     def word_combinations(have, placeholders):
+        """Iterate over possible assignments of words in have to placeholders.
+
+        `have` is the number of words to allocate and `placeholders` is the
+        number of placeholders that those could be distributed to.
+
+        Return an iterable of tuples of integers; the length of each tuple
+        will match `placeholders`.
+
+        """
         if have < placeholders:
             return
         if have == placeholders:
@@ -272,9 +292,15 @@ class Pattern:
                 combos = Pattern.word_combinations(remain, other_groups)
                 for buckets in combos:
                     yield (take,) + tuple(buckets)
-            take -= 1 # backtrack
+            take -= 1  # backtrack
 
     def match(self, input_words):
+        """Match a given list of input words against this pattern.
+
+        Return a dict of captured groups if the pattern matches, or None if
+        the pattern does not match.
+
+        """
         if len(input_words) < len(self.argnames):
             return None
 

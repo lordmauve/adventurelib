@@ -4,7 +4,7 @@ requirements = []
 
 
 try:
-    from shutil import get_terminal_size
+    from shutil import get_terminal_size  # noqa
 except ImportError:
     requirements.append(
         'backports.shutil_get_terminal_size',
