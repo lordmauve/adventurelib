@@ -91,3 +91,7 @@ ENV/
 doc/_build
 
 *.swp
+
+# PyCharm IDE files
+.git/
+.idea/

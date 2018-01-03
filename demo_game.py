@@ -1,8 +1,9 @@
+"""Demonstration game"""
 from adventurelib import *
 
 Room.items = Bag()
 
-current_room = starting_room = Room("""
+starting_room = Room("""
 You are in a dark room.
 """)
 
@@ -11,58 +12,61 @@ You are in a beautiful valley.
 """)
 
 mallet = Item('rusty mallet', 'mallet')
-valley.items = Bag({mallet,})
-
-inventory = Bag()
+valley.items = Bag({mallet, })
 
 
 @when('north', direction='north')
 @when('south', direction='south')
 @when('east', direction='east')
 @when('west', direction='west')
-def go(direction):
-    global current_room
-    room = current_room.exit(direction)
+def go(direction, game):
+    room = game.current_room.exit(direction)
     if room:
-        current_room = room
-        say('You go %s.' % direction)
-        look()
+        game.current_room = room
+        game.say('You go %s.' % direction)
+        look(game)
 
 
 @when('take ITEM')
-def take(item):
-    obj = current_room.items.take(item)
+def take(item, game):
+    obj = game.current_room.items.take(item)
     if obj:
-        say('You pick up the %s.' % obj)
-        inventory.add(obj)
+        game.say('You pick up the %s.' % obj)
+        game.inventory.add(obj)
     else:
-        say('There is no %s here.' % item)
+        game.say('There is no %s here.' % item)
 
 
 @when('drop THING')
-def drop(thing):
-    obj = inventory.take(thing)
+def drop(thing, game):
+    obj = game.inventory.take(thing)
     if not obj:
-        say('You do not have a %s.' % thing)
+        game.say('You do not have a %s.' % thing)
     else:
-        say('You drop the %s.' % obj)
-        current_room.items.add(obj)
+        game.say('You drop the %s.' % obj)
+        game.current_room.items.add(obj)
 
 
 @when('look')
-def look():
-    say(current_room)
-    if current_room.items:
-        for i in current_room.items:
-            say('A %s is here.' % i)
+def look(game):
+    game.say(game.current_room)
+    if game.current_room.items:
+        for i in game.current_room.items:
+            game.say('A %s is here.' % i)
 
 
 @when('inventory')
-def show_inventory():
-    say('You have:')
-    for thing in inventory:
-        say(thing)
+def show_inventory(game):
+    game.say('You have:')
+    for thing in game.inventory:
+        game.say(thing)
+
+        
+def setup(game):
+    """Set up the game world"""
+    game.current_room = starting_room
+    game.inventory = Bag()
+    look(game)
 
 
-look()
-start()
+start(setup)

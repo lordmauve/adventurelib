@@ -1,25 +1,27 @@
+"""Simple library for writing Text Adventures in Python"""
 import re
 import sys
 import inspect
-import readline
 import textwrap
 import random
 from copy import deepcopy
-from functools import partial
-from itertools import zip_longest
 try:
     from shutil import get_terminal_size
 except ImportError:
-    from backports.shutil_get_terminal_size import get_terminal_size
-else:
-    def get_terminal_size(fallback=(80, 24)):
-        return fallback
+    try:
+        from backports.shutil_get_terminal_size import get_terminal_size
+    except ImportError:
+        def get_terminal_size(fallback=(80, 24)):
+            """Fallback definition for terminal size getting"""
+            return fallback
 
 
 __all__ = (
     'when',
     'start',
     'Room',
+    'Pattern',
+    '_handle_command',
     'Item',
     'Bag',
     'say',
@@ -28,6 +30,10 @@ __all__ = (
 
 class InvalidCommand(Exception):
     """A command is not defined correctly."""
+
+
+class InvalidDirection(Exception):
+    """User attempts to travel in an invalid direction."""
 
 
 class Placeholder:
@@ -47,12 +53,12 @@ class Room:
     @staticmethod
     def add_direction(forward, reverse):
         """Add a direction."""
-        for dir in (forward, reverse):
-            if not dir.islower():
+        for direc in (forward, reverse):
+            if not direc.islower():
                 raise InvalidCommand(
                     'Invalid direction %r: directions must be all lowercase.'
                 )
-            if dir in Room._directions:
+            if direc in Room._directions:
                 raise KeyError('%r is already a direction!' % dir)
         Room._directions[forward] = reverse
         Room._directions[reverse] = forward
@@ -99,6 +105,7 @@ class Room:
             object.__setattr__(value, reverse, self)
         else:
             object.__setattr__(self, name, value)
+
 
 Room.add_direction('north', 'south')
 Room.add_direction('east', 'west')
@@ -153,7 +160,7 @@ class Bag(set):
         if isinstance(v, str):
             return bool(self.find(v))
         else:
-            return set.__contains__(v)
+            return set.__contains__(self, v)
 
     def take(self, name):
         """Remove an Item from the bag if it is present.
@@ -193,12 +200,14 @@ class Bag(set):
         return obj
 
 
-def _register(command, func, kwargs={}):
+def _register(command, func, kwargs=None):
     """Register func as a handler for the given command."""
+    if kwargs is None:
+        kwargs = {}
     pattern = Pattern(command)
     sig = inspect.signature(func)
     func_argnames = set(sig.parameters)
-    when_argnames = set(pattern.argnames) | set(kwargs.keys())
+    when_argnames = set(pattern.argnames) | set(kwargs.keys()) | {'game'}
     if func_argnames != when_argnames:
         raise InvalidCommand(
             'The function %s%s has the wrong signature for @when(%r)' % (
@@ -212,6 +221,7 @@ def _register(command, func, kwargs={}):
 
 
 class Pattern:
+    """Command-matching pattern"""
     def __init__(self, pattern):
         self.orig_pattern = pattern
         words = pattern.split()
@@ -221,7 +231,7 @@ class Pattern:
         for w in words:
             if not w.isalpha():
                 raise InvalidCommand(
-                    'Invalid command %r' % command +
+                    'Invalid command %r' % w +
                     'Commands may consist of letters only.'
                 )
             if w.isupper():
@@ -233,7 +243,7 @@ class Pattern:
                 match.append(w)
             else:
                 raise InvalidCommand(
-                    'Invalid command %r' % command +
+                    'Invalid command %r' % w +
                     '\n\nWords in commands must either be in lowercase or ' +
                     'capitals, not a mix.'
                 )
@@ -254,6 +264,7 @@ class Pattern:
 
     @staticmethod
     def word_combinations(have, placeholders):
+        """??? (not sure what this does)"""
         if have < placeholders:
             return
         if have == placeholders:
@@ -272,9 +283,10 @@ class Pattern:
                 combos = Pattern.word_combinations(remain, other_groups)
                 for buckets in combos:
                     yield (take,) + tuple(buckets)
-            take -= 1 # backtrack
+            take -= 1  # backtrack
 
     def match(self, input_words):
+        """Attempt to match a command against the pattern"""
         if len(input_words) < len(self.argnames):
             return None
 
@@ -326,12 +338,13 @@ def no_command_matches(command):
 def when(command, **kwargs):
     """Decorator for command functions."""
     def dec(func):
+        """decorator"""
         _register(command, func, kwargs)
         return func
     return dec
 
 
-def help():
+def cmd_help():
     """Print a list of the commands you can give."""
     print('Here is a list of the commands you can give:')
     cmds = sorted(c.orig_pattern for c, _, _ in commands)
@@ -339,7 +352,7 @@ def help():
         print(c)
 
 
-def _handle_command(cmd):
+def _handle_command(cmd, game=None):
     """Handle a command typed by the user."""
     ws = cmd.lower().split()
     for pattern, func, kwargs in commands:
@@ -347,26 +360,89 @@ def _handle_command(cmd):
         matches = pattern.match(ws)
         if matches is not None:
             args.update(matches)
-            func(**args)
+            func(**args, game=game)
             break
     else:
         no_command_matches(cmd)
     print()
 
 
-def start(help=True):
+class Interface:
+    """Superclass for all interfaces (ways of interacting with the game)"""
+    def __init__(self):
+        pass
+    
+    def get_command(self, prompt):
+        """Get a command"""
+        return ''
+    
+    def say(self, msg):
+        """Send output to the user"""
+        pass
+
+        
+class TerminalInterface(Interface):
+    """Interface for basic terminal I/O (the default)"""
+    def get_command(self, prompt):
+        """Get a command"""
+        return input(prompt).strip()
+    
+    def say(self, msg):
+        """Print a message.
+
+        Unlike print(), this deals with de-denting and wrapping of text to fit
+        within the width of the terminal.
+
+        Paragraphs separated by blank lines in the input will be wrapped
+        separately.
+
+        """
+        msg = str(msg)
+        msg = re.sub(r'^[ \t]*(.*?)[ \t]*$', r'\1', msg, flags=re.M)
+        width = get_terminal_size()[0]
+        paragraphs = re.split(r'\n(?:[ \t]*\n)', msg)
+        formatted = (textwrap.fill(p.strip(), width=width) for p in paragraphs)
+        print('\n\n'.join(formatted))
+
+        
+class Game:
+    """Game World Environment"""
+    def __init__(self, interface: Interface):
+        self.worldvars = {}
+        self.interface = interface
+        self.say = self.interface.say
+    
+    def __getattr__(self, item):
+        try:
+            return self.worldvars[item]
+        except KeyError:
+            raise AttributeError()
+    
+    def __setattr__(self, attr, val):
+        if attr in {'worldvars', 'interface', 'say'}:
+            print('  in dict')
+            self.__dict__[attr] = val
+        else:
+            self.worldvars[attr] = val
+
+
+def start(setup=None, interface: Interface=TerminalInterface(), help=True):
     """Run the game."""
     if help:
-        # Ugly, but we want to keep the arguments consistent
-        help = globals()['help']
         qmark = Pattern('help')
         qmark.prefix = ['?']
         qmark.orig_pattern = '?'
-        commands.insert(0, (Pattern('help'), help, {}))
-        commands.insert(0, (qmark, help, {}))
+        commands.insert(0, (Pattern('help'), cmd_help, {}))
+        commands.insert(0, (qmark, cmd_help, {}))
+    
+    game = Game(interface)
+    
+    if setup is not None:
+        setup(game)
+    
     while True:
         try:
-            cmd = input(prompt()).strip()
+            cmd = interface.get_command(prompt())
         except EOFError:
             print()
             break
@@ -374,7 +450,7 @@ def start(help=True):
         if not cmd:
             continue
 
-        _handle_command(cmd)
+        _handle_command(cmd, game)
 
 
 def say(msg):
