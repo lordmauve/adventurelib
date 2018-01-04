@@ -1,16 +1,23 @@
 # Config file for automatic testing at travis-ci.org
 
 language: python
-python: 3.6
+python:
+  - 3.6
+  - 3.5
+  - 3.4
 
-env:
-  - TOXENV=py36
-  - TOXENV=py35
-  - TOXENV=py34
-  - TOXENV=flake8
+install:
+  - pip install pytest
 
-# Install tox; this is used to run tests under multiple interpreters
-install: pip install -U tox
+# Run pytest under each interpreter
+script:
+  - py.test
 
-# in each Travis 'env' delegate to one tox 'testenv'
-script: tox -e ${TOXENV}
+
+# Add a job to run flake8
+jobs:
+  include:
+    - env: NAME=flake8
+      python: 3.6
+      install: pip install flake8
+      script: flake8 adventurelib.py test_adventurelib.py
