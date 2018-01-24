@@ -10,6 +10,10 @@ valley = starting_room.north = Room("""
 You are in a beautiful valley.
 """)
 
+magic_forest = valley.north = Room("""
+You are in a enchanted forest where magic grows wildly.
+""")
+
 mallet = Item('rusty mallet', 'mallet')
 valley.items = Bag({mallet,})
 
@@ -27,6 +31,10 @@ def go(direction):
         current_room = room
         say('You go %s.' % direction)
         look()
+        if room == magic_forest:
+            set_context('magic_aura')
+        else:
+            set_context('default')
 
 
 @when('take ITEM')
@@ -63,6 +71,10 @@ def show_inventory():
     for thing in inventory:
         say(thing)
 
+@when('cast', context='magic_aura', magic=None)
+def cast(magic):
+    if magic == None:
+        say("Which magic you would like to spell?")
 
 look()
 start()
