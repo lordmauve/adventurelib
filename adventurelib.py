@@ -22,7 +22,20 @@ __all__ = (
     'Item',
     'Bag',
     'say',
+    'set_context'
 )
+
+current_context = 'default'
+
+
+def set_context(new_context):
+    """Set current context."""
+    global current_context
+
+    if new_context != 'default':
+        new_context = 'default.' + new_context
+
+    current_context = new_context
 
 
 class InvalidCommand(Exception):
@@ -31,6 +44,10 @@ class InvalidCommand(Exception):
 
 class InvalidDirection(Exception):
     """The direction specified was not pre-declared."""
+
+
+class InvalidContext(Exception):
+    """Current context is not defined correctly."""
 
 
 class Placeholder:
@@ -197,9 +214,9 @@ class Bag(set):
         return obj
 
 
-def _register(command, func, kwargs={}):
+def _register(command, func, context='default', kwargs={}):
     """Register func as a handler for the given command."""
-    pattern = Pattern(command)
+    pattern = Pattern(command, context)
     sig = inspect.signature(func)
     func_argnames = set(sig.parameters)
     when_argnames = set(pattern.argnames) | set(kwargs.keys())
@@ -223,8 +240,9 @@ class Pattern:
     group named 'item'.
     """
 
-    def __init__(self, pattern):
+    def __init__(self, pattern, context='default'):
         self.orig_pattern = pattern
+        self.pattern_context = context
         words = pattern.split()
         match = []
         argnames = []
@@ -294,6 +312,27 @@ class Pattern:
                     yield (take,) + tuple(buckets)
             take -= 1  # backtrack
 
+    def is_active(self):
+        """Verify if a command is active considering current context."""
+        global current_context
+
+        if current_context is None:
+            raise InvalidContext('Context is invalid!')
+
+        context = self.pattern_context
+
+        if context is not None:
+            if context != 'default':
+                context = 'default.' + context
+            if context == current_context:
+                return True
+            uppercontext = context + '.'
+            context_len = len(context)+1
+            if uppercontext == current_context[:context_len]:
+                return True
+
+        return False
+
     def match(self, input_words):
         """Match a given list of input words against this pattern.
 
@@ -301,6 +340,11 @@ class Pattern:
         the pattern does not match.
 
         """
+        global current_context
+
+        if not self.is_active():
+            return None
+
         if len(input_words) < len(self.argnames):
             return None
 
@@ -349,10 +393,10 @@ def no_command_matches(command):
     print("I don't understand '%s'." % command)
 
 
-def when(command, **kwargs):
+def when(command, context='default', **kwargs):
     """Decorator for command functions."""
     def dec(func):
-        _register(command, func, kwargs)
+        _register(command, func, context, kwargs)
         return func
     return dec
 
@@ -360,7 +404,7 @@ def when(command, **kwargs):
 def help():
     """Print a list of the commands you can give."""
     print('Here is a list of the commands you can give:')
-    cmds = sorted(c.orig_pattern for c, _, _ in commands)
+    cmds = sorted(c.orig_pattern for c, _, _ in commands if c.is_active())
     for c in cmds:
         print(c)
 
