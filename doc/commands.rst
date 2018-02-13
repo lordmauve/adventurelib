@@ -230,3 +230,171 @@ commands, such as when you enter a room:
         current_room = current_room.north
         print('You go north.')
         look()
+
+
+Command Contexts
+----------------
+
+In some games, a command might only be available in certain contexts, or might
+change its behaviour in some contexts.
+
+The most simple way of checking if a command can be used right now is to
+add an ``if`` statement:
+
+
+.. code-block:: python
+
+    @when('exit')
+    def exit_room():
+        global current_room
+        if current_room.outside:
+            current_room = current_room.outside
+        else:
+            say("Exit what? You're already outside.")
+
+This isn't always the best way. In some cases there are just too many different
+conditions to check, and you would end up writing too many ``if``/``else``
+statements. This can be useful in situations like these:
+
+* If you have levels then certain actions might only be available in one of
+  the levels.
+* If you have a menu - a main menu, or an inventory menu perhaps - then you
+  might have a different set of commands in that menu.
+* If you can "unlock" certain commands as you progress through the game.
+
+The **command context** system allows you to configure some of your commands
+to be available in certain contexts only.
+
+To do this, pass a ``context=`` keyword argument to the ``@when`` decorator:
+
+.. code-block:: python
+    :emphasize-lines: 1
+
+    @when('cast SPELL', context='wonderland')
+    def cast(spell):
+        say(f"You cast the spell.")
+
+
+Now this command will be completely hidden in help and in the game::
+
+    > cast fireball
+    I don't understand 'cast fireball'.
+
+This command will only become active when we set the context to match. You can
+set and get the context using ``set_context()`` and ``get_context()``:
+
+.. function:: adventurelib.set_context(new_context)
+
+    Set the current command context to ``new_context``.
+
+    Pass ``None`` to clear the current context.
+
+.. function:: adventurelib.get_context()
+
+    Get the current command context.
+
+
+So for example:
+
+.. code-block:: python
+
+    @when('enter mirror')
+    def enter_mirror():
+        if get_context() == 'wonderland':
+            say('There is no mirror here.')
+        else:
+            set_context('wonderland')
+            say('You step into the silvery surface, which feels wet and cool.')
+            say('You realise that clicking your heels will let you return.')
+
+
+    @when('click heels', context='wonderland')
+    def click_heels(spell):
+        set_context(None)
+        say('The moment your heels touch the world rearranges around you.')
+
+
+Now you can transition between the different contexts:o
+
+.. code-block:: none
+
+    > enter mirror
+    You step into the silvery surface, which feels wet and cool.
+    You realise that clicking your heels will let you return.
+
+    > help
+    enter mirror
+    cast SPELL
+    click heels
+
+    > enter mirror
+    There is no mirror here.
+
+    > cast fireball
+    You cast the spell.
+
+    > click heels
+    The moment your heels touch the world rearranges around you.
+
+    > cast fireball
+    I don't understand 'cast fireball'.
+
+    > click heels
+    I don't understand 'click heels'.
+
+
+Note that any commands specified without passing ``context=`` will be available
+in all contexts.
+
+You might want to call ``set_context()`` before you call ``start()`` in order
+to set the context that the game will start in.
+
+.. tip::
+
+    Note that if you are not in the right context, the command will not appear
+    at all. Beware of confusing your users with appearing and disappearing
+    commands.
+
+
+Context Hierarchies
+'''''''''''''''''''
+
+Contexts may be nested inside other contexts. To do this, use a ``.`` character
+to separate different levels of the context hierarchy:
+
+.. code-block:: python
+
+    @when('land', context='wonderland.flying')
+    def land():
+        set_context('wonderland')
+        say('You gradually drop until you feel the earth beneath your feet.')
+
+When the current context is ``wonderland.flying``, all the ``wonderland``
+commands are available as well as ``wonderland.flying`` commands and all
+commands specified without ``context=``.
+
+When the current context is ``wonderland``, the ``land`` command will not be
+available::
+
+    You dance through the sky like a feather on the wind.
+
+    > land
+    You gradually drop until you feel the earth beneath your feet.
+
+    > land
+    I don't understand 'land'.
+
+The most deeply nested context takes priority. You can use this to pass
+different parameters to a command in different contexts, or call a different
+function entirely:
+
+.. code-block:: python
+
+    @when('north', dir='north')
+    @when('north', dir='south', context='confused')
+    def go(dir):
+        ...
+
+    @when('north', context='confused.really')
+    def confused_north():
+        say('The cauliflowers are in bloom this year.')

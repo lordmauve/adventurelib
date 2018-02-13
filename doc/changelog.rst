@@ -1,9 +1,10 @@
 Release History
 ===============
 
-1.1.1 - upcoming
+1.2 - 2018-02-13
 ----------------
 
+* New: Commands can be configured to be active only in certain :ref:`contexts`.
 * Fix: ``say()`` function does not dedent before wrapping text.
 
 1.1 - 2016-11-20

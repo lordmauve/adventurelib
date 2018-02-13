@@ -22,20 +22,94 @@ __all__ = (
     'Item',
     'Bag',
     'say',
-    'set_context'
+    'set_context',
+    'get_context',
 )
 
-current_context = 'default'
+
+#: The current context.
+#:
+#: Commands will only be available if their context is "within" the currently
+#: active context, a functiondefined by '_match_context()`.
+current_context = None
+
+
+#: The separator that defines the context hierarchy
+CONTEXT_SEP = '.'
 
 
 def set_context(new_context):
-    """Set current context."""
+    """Set current context.
+
+    Set the context to `None` to clear the context.
+
+    """
     global current_context
-
-    if new_context != 'default':
-        new_context = 'default.' + new_context
-
+    _validate_context(new_context)
     current_context = new_context
+
+
+def get_context():
+    """Get the current command context."""
+    return current_context
+
+
+def _validate_context(context):
+    """Raise an exception if the given context is invalid."""
+    if context is None:
+        return
+
+    err = []
+    if not context:
+        err.append('be empty')
+    if context.startswith(CONTEXT_SEP):
+        err.append('start with {sep}')
+    if context.endswith(CONTEXT_SEP):
+        err.append('end with {sep}')
+    if CONTEXT_SEP * 2 in context:
+        err.append('contain {sep}{sep}')
+    if err:
+        if len(err) > 1:
+            msg = ' or '.join([', '.join(err[:-1]), err[-1]])
+        else:
+            msg = err[0]
+        msg = 'Context {ctx!r} may not ' + msg
+        raise ValueError(msg.format(sep=CONTEXT_SEP, ctx=context))
+
+
+def _match_context(context, active_context):
+    """Return True if `context` is within `active_context`.
+
+    adventurelib offers a hierarchical system of contexts defined with a
+    dotted-string notation.
+
+    A context matches if the active context is "within" the pattern's context.
+
+    For example:
+
+    * ``ham.spam`` is within ``ham.spam``
+    * ``ham.spam`` is within ``ham``
+    * ``ham.spam`` is within ``None``.
+    * ``ham.spam`` is not within ``ham.spam.eggs``
+    * ``ham.spam`` is not within ``spam`` or ``eggs``
+    * ``None`` is within ``None`` and nothing else.
+
+    """
+    if context is None:
+        # If command has no context, it always matches
+        return True
+
+    if active_context is None:
+        # If the command has a context, and we don't, no match
+        return False
+
+    # The active_context matches if it starts with context and is followed by
+    # the end of the string or the separator
+    clen = len(context)
+    return (
+        active_context.startswith(context) and
+        active_context[clen:clen + len(CONTEXT_SEP)] in ('', CONTEXT_SEP)
+    )
 
 
 class InvalidCommand(Exception):
@@ -44,10 +118,6 @@ class InvalidCommand(Exception):
 
 class InvalidDirection(Exception):
     """The direction specified was not pre-declared."""
-
-
-class InvalidContext(Exception):
-    """Current context is not defined correctly."""
 
 
 class Placeholder:
@@ -214,7 +284,7 @@ class Bag(set):
         return obj
 
 
-def _register(command, func, context='default', kwargs={}):
+def _register(command, func, context=None, kwargs={}):
     """Register func as a handler for the given command."""
     pattern = Pattern(command, context)
     sig = inspect.signature(func)
@@ -240,8 +310,9 @@ class Pattern:
     group named 'item'.
     """
 
-    def __init__(self, pattern, context='default'):
+    def __init__(self, pattern, context=None):
         self.orig_pattern = pattern
+        _validate_context(context)
         self.pattern_context = context
         words = pattern.split()
         match = []
@@ -276,9 +347,10 @@ class Pattern:
         self.fixed = len(self.pattern) - self.placeholders
 
     def __repr__(self):
-        return '%s(%r)' % (
+        return '%s(%r%s)' % (
             type(self).__name__,
-            self.orig_pattern
+            self.orig_pattern,
+            ', context=%r' % self.pattern_context if self.pattern_context else ''
         )
 
     @staticmethod
@@ -313,25 +385,14 @@ class Pattern:
             take -= 1  # backtrack
 
     def is_active(self):
-        """Verify if a command is active considering current context."""
-        global current_context
+        """Return True if a command is active in the current context."""
+        return _match_context(self.pattern_context, current_context)
 
-        if current_context is None:
-            raise InvalidContext('Context is invalid!')
-
-        context = self.pattern_context
-
-        if context is not None:
-            if context != 'default':
-                context = 'default.' + context
-            if context == current_context:
-                return True
-            uppercontext = context + '.'
-            context_len = len(context)+1
-            if uppercontext == current_context[:context_len]:
-                return True
-
-        return False
+    def ctx_order(self):
+        """Return an integer indicating how nested the context is."""
+        if not self.pattern_context:
+            return 0
+        return self.pattern_context.count(CONTEXT_SEP) + 1
 
     def match(self, input_words):
         """Match a given list of input words against this pattern.
@@ -341,9 +402,6 @@ class Pattern:
 
         """
         global current_context
-
-        if not self.is_active():
-            return None
 
         if len(input_words) < len(self.argnames):
             return None
@@ -393,7 +451,7 @@ def no_command_matches(command):
     print("I don't understand '%s'." % command)
 
 
-def when(command, context='default', **kwargs):
+def when(command, context=None, **kwargs):
     """Decorator for command functions."""
     def dec(func):
         _register(command, func, context, kwargs)
@@ -409,10 +467,30 @@ def help():
         print(c)
 
 
+def _available_commands():
+    """Return the list of available commands in the current context.
+
+    The order will be the order in which they should be considered, which
+    corresponds to how deeply nested the context is.
+
+    """
+    available_commands = []
+    for c in commands:
+        pattern = c[0]
+        if pattern.is_active():
+            available_commands.append(c)
+    available_commands.sort(
+        key=lambda c: c[0].ctx_order(),
+        reverse=True,
+    )
+    return available_commands
+
+
 def _handle_command(cmd):
     """Handle a command typed by the user."""
     ws = cmd.lower().split()
-    for pattern, func, kwargs in commands:
+
+    for pattern, func, kwargs in _available_commands():
         args = kwargs.copy()
         matches = pattern.match(ws)
         if matches is not None:

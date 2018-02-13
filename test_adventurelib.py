@@ -1,11 +1,24 @@
 from unittest.mock import patch
-from contextlib import redirect_stdout
+from contextlib import redirect_stdout, contextmanager
 from io import StringIO
+
+import pytest
 
 import adventurelib
 from adventurelib import Pattern, when, _handle_command, say, Room, Item, Bag
 
 orig_commands = adventurelib.commands[:]
+
+
+@contextmanager
+def active_context(ctx):
+    """Context manager to set the current command context."""
+    prev_ctx = adventurelib.current_context
+    adventurelib.set_context(ctx)
+    try:
+        yield
+    finally:
+        adventurelib.set_context(prev_ctx)
 
 
 def teardown():
@@ -128,6 +141,27 @@ def test_register_args():
     assert args == ['north']
 
 
+@pytest.mark.parametrize('ctx,expected', [
+    (None, 'north'),
+    ('confused', 'south'),
+    ('confused.really', 'cauliflower'),
+])
+def test_register_context(ctx, expected):
+    """The result of a command changes in different contexts."""
+    cmd = None
+
+    # Register out of order to test tie-breaking by context nesting depth
+    @when('north', dir='north')
+    @when('north', dir='cauliflower', context='confused.really')
+    @when('north', dir='south', context='confused')
+    def func(dir):
+        nonlocal cmd
+        cmd = dir
+    with active_context(ctx):
+        _handle_command('north')
+    assert cmd == expected
+
+
 def test_register_match():
     args = None
 
@@ -247,6 +281,7 @@ def test_bag_take_random(randrange):
 
 
 def test_bag_find():
+    """We can find items in a bag by name, case insensitively."""
     name, *aliases = ['Name', 'UPPER ALIAS', 'lower alias']
     bag = Bag({
         Item(name, *aliases)
@@ -258,3 +293,71 @@ def test_bag_find():
     assert bag.find('upper alias')
     assert bag.find('LOWER ALIAS')
     assert not bag.find('other')
+
+
+@pytest.mark.parametrize(
+    'current_context',
+    ['foo', 'foo.bar', 'foo.bar.baz']
+)
+def test_match_context(current_context):
+    """We can match contexts."""
+    assert adventurelib._match_context('foo', current_context)
+
+
+@pytest.mark.parametrize(
+    'current_context',
+    [None, 'bar', 'bar.foo'],
+)
+def test_no_match_context(current_context):
+    """A context doesn't match if it is not "within" the pattern context."""
+    assert not adventurelib._match_context('foo', current_context)
+
+
+def test_match_context_none():
+    """The current context matches if the pattern context is None."""
+    assert adventurelib._match_context(None, 'foo.bar')
+
+
+@pytest.mark.parametrize(
+    'context',
+    [None, 'foo', 'foo.bar']
+)
+def test_validate_context(context):
+    """We can validate valid contexts."""
+    adventurelib._validate_context(context)
+
+
+def test_validate_context_empty():
+    """An empty string is not a valid context."""
+    with pytest.raises(ValueError) as exc:
+        adventurelib._validate_context("")
+    assert str(exc.value) == "Context '' may not be empty"
+
+
+def test_validate_context_start_dot():
+    """A context that starts with . is invalid."""
+    with pytest.raises(ValueError) as exc:
+        adventurelib._validate_context(".foo")
+    assert str(exc.value) == "Context '.foo' may not start with ."
+
+
+def test_validate_context_end_dot():
+    """A context that ends with . is invalid."""
+    with pytest.raises(ValueError) as exc:
+        adventurelib._validate_context("foo.bar.")
+    assert str(exc.value) == "Context 'foo.bar.' may not end with ."
+
+
+def test_validate_context_double_dot():
+    """A context that contains .. is invalid."""
+    with pytest.raises(ValueError) as exc:
+        adventurelib._validate_context("foo..bar")
+    assert str(exc.value) == "Context 'foo..bar' may not contain .."
+
+
+def test_validate_context_wrong():
+    """A context that is wrong in various ways has a custom message."""
+    with pytest.raises(ValueError) as exc:
+        adventurelib._validate_context(".foo.bar.")
+    err = str(exc.value)
+    assert err == "Context '.foo.bar.' may not start with . or end with ."
