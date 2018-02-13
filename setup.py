@@ -1,4 +1,5 @@
 from setuptools import setup
+from adventurelib import __version__
 
 requirements = []
 
@@ -14,7 +15,7 @@ except ImportError:
 setup(
     name='adventurelib',
     description='Easy text adventures',
-    version='1.1',
+    version=__version__,
     author='Daniel Pope',
     author_email='mauve@mauveweb.co.uk',
     url='https://adventurelib.readthedocs.io/',
