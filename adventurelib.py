@@ -347,10 +347,13 @@ class Pattern:
         self.fixed = len(self.pattern) - self.placeholders
 
     def __repr__(self):
+        ctx = ''
+        if self.pattern_context:
+            ctx = ', context=%r' % self.pattern_context
         return '%s(%r%s)' % (
             type(self).__name__,
             self.orig_pattern,
-            ', context=%r' % self.pattern_context if self.pattern_context else ''
+            ctx
         )
 
     @staticmethod
