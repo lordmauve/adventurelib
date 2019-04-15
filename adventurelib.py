@@ -1,7 +1,10 @@
 import re
 import sys
 import inspect
-import readline  # noqa: adds readline semantics to input()
+try:
+    import readline  # noqa: adds readline semantics to input()
+except ImportError:
+    pass
 import textwrap
 import random
 from copy import deepcopy
