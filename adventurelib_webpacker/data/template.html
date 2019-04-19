@@ -59,7 +59,6 @@ html {
     <script type="text/python">
 import sys
 from browser import document, window
-import adventurelib
 
 OUT_DIV = document.getElementById('out')
 INPUT = document.getElementById('inp')
@@ -72,6 +71,17 @@ def addpara(msg, class_=None):
         p.className = class_
     OUT_DIV.appendChild(p)
     OUT_DIV.scrollTop = OUT_DIV.scrollHeight - OUT_DIV.offsetHeight
+
+
+class Console:
+    def write(text):
+        addpara(text)
+
+sys.stdout = sys.stderr = Console
+
+addpara('Loading adventurelib')
+import adventurelib
+
 
 def start(help=True):
     """Run the game."""
@@ -93,12 +103,6 @@ def handle_command(cmd):
     adventurelib._handle_command(cmd)
     update_prompt()
 
-class Console:
-    def write(text):
-        addpara(text)
-
-sys.stdout = Console
-
 adventurelib.say = addpara
 adventurelib.start = start
 
@@ -107,8 +111,9 @@ __import__(NAME)
 update_prompt()
     </script>
     <script src="brython.js"></script>
-    <script src="brython_modules.js"></script>
-    <script>
+    <script src="brython_stdlib.js"></script>
+<script id="extra_modules"></script>
+<script>
 const inp = document.getElementById('inp');
 
 inp.addEventListener('keydown', function (event) {

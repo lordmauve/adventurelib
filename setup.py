@@ -23,7 +23,7 @@ setup(
     install_requires=requirements,
     entry_points={
         'console_scripts': [
-            'adventurelib-pack = adventurelib_webpack:main',
+            'adventurelib-pack = adventurelib_webpacker:main',
         ]
     },
     classifiers=[
