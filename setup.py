@@ -21,6 +21,11 @@ setup(
     url='https://adventurelib.readthedocs.io/',
     py_modules=['adventurelib'],
     install_requires=requirements,
+    entry_points={
+        'console_scripts': [
+            'adventurelib-pack = adventurelib_webpack:main',
+        ]
+    },
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Education',

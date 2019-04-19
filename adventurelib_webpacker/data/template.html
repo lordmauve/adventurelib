@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+    <head>
+<style>
+html {
+    background-color: #fff8e3;
+    margin: 10px;
+    font-family: serif;
+    font-size: 16pt;
+
+    color: #333;
+}
+
+#out {
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    top: 20px;
+    bottom: 60px;
+    overflow: auto;
+}
+
+#out p {
+    margin: 0.7em 0;
+    white-space: pre-wrap;
+}
+
+#controls {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+}
+
+#out .user {
+    color: #321;
+    font-style: italic;
+    margin-top: 2em;
+}
+
+.user::before {
+    content: "\25b8";
+    margin-right: 0.5em;
+}
+
+#inp {
+    width: 50em;
+    height: 1.4em;
+}
+</style>
+    </head>
+    <body onload="brython()">
+        <div id="out"></div>
+        <div id="controls">
+            <span id="prompt">&gt;</span>
+            <input id="inp">
+        </div>
+    </body>
+    <script type="text/python">
+import sys
+from browser import document, window
+import adventurelib
+
+OUT_DIV = document.getElementById('out')
+INPUT = document.getElementById('inp')
+PROMPT = document.getElementById('prompt')
+
+def addpara(msg, class_=None):
+    p = document.createElement('p')
+    p.innerText = str(msg)
+    if class_:
+        p.className = class_
+    OUT_DIV.appendChild(p)
+    OUT_DIV.scrollTop = OUT_DIV.scrollHeight - OUT_DIV.offsetHeight
+
+def start(help=True):
+    """Run the game."""
+    if help:
+        help = adventurelib.help
+        qmark = adventurelib.Pattern('help')
+        qmark.prefix = ['?']
+        qmark.orig_pattern = '?'
+        adventurelib.commands.insert(0, (adventurelib.Pattern('help'), help, {}))
+        adventurelib.commands.insert(0, (qmark, help, {}))
+
+    window.handle_command = handle_command
+
+def update_prompt():
+    PROMPT.innerText = adventurelib.prompt()
+
+def handle_command(cmd):
+    addpara(cmd, class_='user')
+    adventurelib._handle_command(cmd)
+    update_prompt()
+
+class Console:
+    def write(text):
+        addpara(text)
+
+sys.stdout = Console
+
+adventurelib.say = addpara
+adventurelib.start = start
+
+NAME = ...
+__import__(NAME)
+update_prompt()
+    </script>
+    <script src="brython.js"></script>
+    <script src="brython_modules.js"></script>
+    <script>
+const inp = document.getElementById('inp');
+
+inp.addEventListener('keydown', function (event) {
+    if (event.keyCode == 13) {
+        let cmd = inp.value;
+        if (window.handle_command) {
+            window.handle_command(cmd);
+        }
+        inp.value = '';
+    }
+}, false);
+    </script>
+</html>
