@@ -329,6 +329,11 @@ class Pattern:
                 )
             if w.isupper():
                 arg = w.lower()
+                if arg in argnames:
+                    raise InvalidCommand(
+                            'Invalid command %r' % pattern + 
+                            '\nIdentifiers may only be used once'
+                            )
                 argnames.append(arg)
                 match.append(Placeholder(arg))
                 self.placeholders += 1
