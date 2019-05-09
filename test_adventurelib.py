@@ -361,3 +361,8 @@ def test_validate_context_wrong():
         adventurelib._validate_context(".foo.bar.")
     err = str(exc.value)
     assert err == "Context '.foo.bar.' may not start with . or end with ."
+
+def test_validate_pattern_double_ident():
+    """A pattern with identifier used twice is incorrect"""
+    with pytest.raises(adventurelib.InvalidCommand) as exc:
+        pat = Pattern("take ITEM with ITEM")
