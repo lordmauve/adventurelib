@@ -2,7 +2,7 @@ import re
 import sys
 import inspect
 try:
-    import readline  # noqa: adds readline semantics to input()
+    from prompt_toolkit import prompt as input
 except ImportError:
     pass
 import textwrap
