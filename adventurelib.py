@@ -2,9 +2,15 @@ import re
 import sys
 import inspect
 try:
+    # use prompt toolkit as input if available
     from prompt_toolkit import prompt as input
 except ImportError:
-    pass
+    try:
+        # augment input with readline if available
+        import readline
+    except ImportError:
+        # fall back to standard input command
+        pass
 import textwrap
 import random
 from copy import deepcopy
