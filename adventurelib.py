@@ -7,7 +7,7 @@ try:
 except ImportError:
     try:
         # augment input with readline if available
-        import readline
+        import readline  # noqa: F401
     except ImportError:
         # fall back to standard input command
         pass
