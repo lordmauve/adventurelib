@@ -362,7 +362,11 @@ def test_validate_context_wrong():
     err = str(exc.value)
     assert err == "Context '.foo.bar.' may not start with . or end with ."
 
+
 def test_validate_pattern_double_ident():
     """A pattern with identifier used twice is incorrect"""
     with pytest.raises(adventurelib.InvalidCommand) as exc:
-        pat = Pattern("take ITEM with ITEM")
+        Pattern("take I with I")
+    err = str(exc.value)
+    assert err == "Invalid command 'take I with I'"\
+                  " Identifiers may only be used once"

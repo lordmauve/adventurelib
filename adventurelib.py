@@ -332,7 +332,7 @@ class Pattern:
                 if arg in argnames:
                     raise InvalidCommand(
                             'Invalid command %r' % pattern +
-                            '\nIdentifiers may only be used once'
+                            ' Identifiers may only be used once'
                             )
                 argnames.append(arg)
                 match.append(Placeholder(arg))
