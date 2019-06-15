@@ -6,7 +6,7 @@ try:
     from prompt_toolkit import PromptSession
     prompt_session = PromptSession()
     input = prompt_session.prompt
-except ImportError:
+except (ImportError, IOError):
     try:
         # augment input with readline if available
         import readline  # noqa: F401
