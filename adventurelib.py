@@ -3,7 +3,9 @@ import sys
 import inspect
 try:
     # use prompt toolkit as input if available
-    from prompt_toolkit import prompt as input
+    from prompt_toolkit import PromptSession
+    prompt_session = PromptSession()
+    input = prompt_session.prompt
 except ImportError:
     try:
         # augment input with readline if available

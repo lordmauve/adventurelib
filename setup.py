@@ -3,7 +3,7 @@ from adventurelib import __version__
 
 requirements = []
 extras_require = {
-    'prompt_toolkit':  ["prompt_toolkit"]
+    'prompt_toolkit':  ["prompt_toolkit >= 2.0.0"]
 }
 
 try:
