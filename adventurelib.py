@@ -2,9 +2,17 @@ import re
 import sys
 import inspect
 try:
-    import readline  # noqa: adds readline semantics to input()
-except ImportError:
-    pass
+    # use prompt toolkit as input if available
+    from prompt_toolkit import PromptSession
+    prompt_session = PromptSession()
+    input = prompt_session.prompt
+except (ImportError, IOError, ValueError):
+    try:
+        # augment input with readline if available
+        import readline  # noqa: F401
+    except ImportError:
+        # fall back to standard input command
+        pass
 import textwrap
 import random
 from copy import deepcopy
