@@ -287,7 +287,7 @@ class Bag(set):
         return obj
 
 
-def _register(command, func, context=None, kwargs={}):
+def _register(command, func, context=None, **kwargs):
     """Register func as a handler for the given command."""
     pattern = Pattern(command, context)
     sig = inspect.signature(func)
@@ -536,7 +536,7 @@ def start(help=True):
         _handle_command(cmd)
 
 
-def say(msg):
+def say(msg, **kwargs):
     """Print a message.
 
     Unlike print(), this deals with de-denting and wrapping of text to fit
@@ -551,7 +551,7 @@ def say(msg):
     width = get_terminal_size()[0]
     paragraphs = re.split(r'\n(?:[ \t]*\n)', msg)
     formatted = (textwrap.fill(p.strip(), width=width) for p in paragraphs)
-    print('\n\n'.join(formatted))
+    print('\n\n'.join(formatted), **kwargs)
 
 
 commands = [
