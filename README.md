@@ -1,5 +1,9 @@
 # adventurelib
 
+[![Build](https://travis-ci.org/lordmauve/adventurelib.svg?branch=master)
+](https://travis-ci.org/lordmauve/adventurelib)
+[![Documentation Status](https://readthedocs.org/projects/adventurelib/badge/?version=latest)](https://adventurelib.readthedocs.io/en/latest/?badge=latest)
+
 `adventurelib` provides basic functionality for writing text-based adventure
 games, with the aim of making it easy enough for young teenagers to do.
 
