@@ -28,6 +28,9 @@ setup(
     author='Daniel Pope',
     author_email='mauve@mauveweb.co.uk',
     url='https://github.com/lordmauve/adventurelib',
+    project_urls={
+        'Documentation': 'https://adventurelib.readthedocs.io/'
+    },
     py_modules=['adventurelib'],
     install_requires=requirements,
     classifiers=[
