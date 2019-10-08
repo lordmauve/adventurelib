@@ -1,6 +1,12 @@
 Release History
 ===============
 
+1.2.1 - 2019-10-08
+------------------
+
+* Fix: prevent repeating an identifier in a `@when` pattern.
+* Minor packaging improvements.
+
 1.2 - 2018-02-13
 ----------------
 

@@ -6,16 +6,6 @@ from adventurelib import __version__
 ROOT = abspath(dirname(__file__))
 
 
-requirements = []
-
-
-try:
-    from shutil import get_terminal_size  # noqa
-except ImportError:
-    requirements.append(
-        'backports.shutil_get_terminal_size',
-    )
-
 with open(join(ROOT, "README.md")) as fd:
     README = fd.read()
 
@@ -32,7 +22,12 @@ setup(
         'Documentation': 'https://adventurelib.readthedocs.io/'
     },
     py_modules=['adventurelib'],
-    install_requires=requirements,
+    extras_require={
+        ':python_version < "3.3"': [
+            'backports.shutil_get_terminal_size>=1.0.0',
+        ],
+    },
+    python_requires='>=3',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Education',

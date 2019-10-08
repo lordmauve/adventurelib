@@ -17,7 +17,7 @@ except ImportError:
         def get_terminal_size(fallback=(80, 24)):
             return fallback
 
-__version__ = '1.2'
+__version__ = '1.2.1'
 __all__ = (
     'when',
     'start',
