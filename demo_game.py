@@ -67,7 +67,7 @@ def look():
 
 @when('inventory')
 def show_inventory():
-    say('You have:')
+    say('You have:', 'yellow')
     for thing in inventory:
         say(thing)
 
