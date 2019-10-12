@@ -91,3 +91,6 @@ ENV/
 doc/_build
 
 *.swp
+
+# VS Code project settings
+.vscode
