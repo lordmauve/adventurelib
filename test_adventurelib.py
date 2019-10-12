@@ -233,6 +233,7 @@ def test_say_multiple_paragraph():
         "separately wrapped. " + u"\u001b[0m\n"
     )
 
+
 def test_say_multiline_paragraph():
     """We can wrap a sentence written in multiple input lines."""
     out = say_at_width(40, """
@@ -246,13 +247,16 @@ def test_say_multiline_paragraph():
         "indented to match. " + u"\u001b[0m\n"
     )
 
+
 def test_say_room_colored():
     r = Room('You are standing in a hallway.')
 
     buf = StringIO()
     with redirect_stdout(buf):
         say(r, 'yellow', 'cyan')
-    assert buf.getvalue() == '\u001b[33;1m\u001b[46;1mYou are standing in a hallway.' + u'\u001b[0m\n'
+    assert buf.getvalue() == '\u001b[33;1m\u001b[46;1mYou are standing ' \
+        'in a hallway.' + u'\u001b[0m\n'
+
 
 @patch('random.randrange', return_value=0)
 def test_bag_get_random(randrange):
