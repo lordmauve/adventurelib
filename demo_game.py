@@ -59,7 +59,7 @@ def drop(thing):
 
 @when('look')
 def look():
-    say(current_room)
+    say(current_room, 'black', 'cyan')
     if current_room.items:
         for i in current_room.items:
             say('A %s is here.' % i)
