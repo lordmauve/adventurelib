@@ -114,6 +114,32 @@ def _match_context(context, active_context):
         active_context[clen:clen + len(CONTEXT_SEP)] in ('', CONTEXT_SEP)
     )
 
+class TabCompleter(object):
+    """Class, used if `readline` is available for Tab/Auto Comlpetion"""
+    def __init__(self, commands):
+        self.commands = commands
+
+    def complete(self, text, state):
+        space = re.compile('.*\s+$', re.M)
+        "Generic readline completion entry point."
+        buffer = readline.get_line_buffer()
+        line = readline.get_line_buffer().split()
+        # show all commands
+        if not line:
+            return [c + ' ' for c in self.commands][state]
+        # account for last argument ending in a space
+        if space.match(buffer):
+            line.append('')
+        # resolve command to the implementation function
+        cmd = line[0].strip()
+        if cmd in self.commands:
+            impl = getattr(self, 'complete_%s' % cmd)
+            args = line[1:]
+            if args:
+                return (impl(args) + [None])[state]
+            return [cmd + ' '][state]
+        results = [c + ' ' for c in self.commands if c.startswith(cmd)] + [None]
+        return results[state]
 
 class InvalidCommand(Exception):
     """A command is not defined correctly."""
@@ -523,6 +549,17 @@ def start(help=True):
         qmark.orig_pattern = '?'
         commands.insert(0, (Pattern('help'), help, {}))
         commands.insert(0, (qmark, help, {}))
+    try:
+        commands = []
+        for pattern, func, kwargs in _available_commands():
+            commands.append(pattern.prefix[0])
+        commands = list(set(commands))
+        completer = TabCompleter(commands)
+        readline.set_completer_delims(' \t\n;')
+        readline.parse_and_bind("tab: complete")
+        readline.set_completer(completer.complete)
+    except NameError:
+        pass
     while True:
         try:
             cmd = input(prompt()).strip()
