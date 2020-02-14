@@ -1,80 +1,87 @@
-from adventurelib import *
+#from adventurelib import *
+import adventurelib as a
 
-Room.items = Bag()
+a.Room.items = a.Bag()
 
-current_room = starting_room = Room("""
+current_room = starting_room = a.Room("""
 You are in a dark room.
 """)
 
-valley = starting_room.north = Room("""
+valley = starting_room.north = a.Room("""
 You are in a beautiful valley.
 """)
 
-magic_forest = valley.north = Room("""
+magic_forest = valley.north = a.Room("""
 You are in a enchanted forest where magic grows wildly.
 """)
 
-mallet = Item('rusty mallet', 'mallet')
-valley.items = Bag({mallet,})
+mallet = a.Item('rusty mallet', 'mallet')
+valley.items = a.Bag({mallet,})
 
-inventory = Bag()
+inventory = a.Bag()
 
 
-@when('north', direction='north')
-@when('south', direction='south')
-@when('east', direction='east')
-@when('west', direction='west')
+@a.when('north', direction='north')
+@a.when('south', direction='south')
+@a.when('east', direction='east')
+@a.when('west', direction='west')
 def go(direction):
     global current_room
     room = current_room.exit(direction)
     if room:
         current_room = room
-        say('You go %s.' % direction)
+        a.say('You go %s.' % direction)
         look()
         if room == magic_forest:
-            set_context('magic_aura')
+            a.set_context('magic_aura')
         else:
-            set_context('default')
+            a.set_context('default')
 
 
-@when('take ITEM')
+@a.when('take ITEM')
 def take(item):
     obj = current_room.items.take(item)
     if obj:
-        say('You pick up the %s.' % obj)
+        a.say('You pick up the %s.' % obj)
         inventory.add(obj)
     else:
-        say('There is no %s here.' % item)
+        a.say('There is no %s here.' % item)
 
 
-@when('drop THING')
+@a.when('drop THING')
 def drop(thing):
     obj = inventory.take(thing)
     if not obj:
-        say('You do not have a %s.' % thing)
+        a.say('You do not have a %s.' % thing)
     else:
-        say('You drop the %s.' % obj)
+        a.say('You drop the %s.' % obj)
         current_room.items.add(obj)
 
 
-@when('look')
+@a.when('look')
 def look():
-    say(current_room)
+    a.say(current_room)
     if current_room.items:
         for i in current_room.items:
-            say('A %s is here.' % i)
+            a.say('A %s is here.' % i)
 
 
-@when('inventory')
+@a.when('inventory')
 def show_inventory():
-    say('You have:')
+    a.say('You have:')
     for thing in inventory:
-        say(thing)
+        a.say(thing)
 
-@when('cast', context='magic_aura', magic=None)
+@a.when('cast', magic=None, context='magic_aura')
+@a.when("cast MAGIC", context='magic_aura')
 def cast(magic):
     if magic == None:
-        say("Which magic you would like to spell?")
+        a.say("Which magic you would like to spell?")
+    elif magic == "fireball":
+        a.say("you cast a flaming Fireball! Woooosh....")
+
+
+
 
 look()
-start()
+a.start()
