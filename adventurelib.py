@@ -230,7 +230,7 @@ class Bag(set):
         super().__init__(*args, **kwargs)
         self._alias_dict = {}
         for item in self:
-            self._add(item)
+            self._add_aliases(item)
 
     #######
     # Convenience functions to update internal alias dict.
@@ -254,7 +254,7 @@ class Bag(set):
     ####### 
     def add(self, item):
         super().add(item)
-        self._add(item)
+        self._add_aliases(item)
 
     def clear(self):
         super().clear()
@@ -318,9 +318,13 @@ class Bag(set):
         """Find an object in the bag by name, but do not remove it.
 
         Return None if the name does not match.
+        
+        If more than one object with the same name exists, returns one of them.
 
         """
-        return self._alias_dict.get(name)
+        name = name.lower()
+        for element in self._alias_dict.get(name, []):
+            return element
 
     def __contains__(self, v):
         """Return True if an Item is present in the bag.
@@ -353,10 +357,12 @@ class Bag(set):
         Return None if the bag is empty.
 
         """
-        result = self.take_random()
-        if result is not None:
-            self.add(result)
-        return result
+        if not self:
+            return None
+        which = random.randrange(len(self))
+        for index, obj in enumerate(self):
+            if index == which:
+                return obj
 
     def take_random(self):
         """Remove an Item from the bag at random, and return it.
@@ -364,10 +370,10 @@ class Bag(set):
         Return None if the bag is empty.
 
         """
-        try:
-            return self.pop()
-        except KeyError:
-            return None
+        obj = self.get_random()
+        if obj is not None:
+            self.remove(obj)
+        return obj
 
 
 def _register(command, func, context=None, kwargs={}):
