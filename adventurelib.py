@@ -376,7 +376,7 @@ class Bag(set):
         return obj
 
 
-def _register(command, func, context=None, kwargs={}):
+def _register(command, func, context=None, **kwargs):
     """Register func as a handler for the given command."""
     pattern = Pattern(command, context)
     sig = inspect.signature(func)
@@ -554,7 +554,7 @@ def no_command_matches(command):
 def when(command, context=None, **kwargs):
     """Decorator for command functions."""
     def dec(func):
-        _register(command, func, context, kwargs)
+        _register(command, func, context, **kwargs)
         return func
     return dec
 
