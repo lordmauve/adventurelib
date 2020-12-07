@@ -153,6 +153,17 @@ def test_register_wrong_args():
             pass
 
 
+def test_register_wrong_args_unenforced():
+    """Same tests as above, but no exceptions are raised."""
+    @when('noargs', enforce_signature=False)
+    def noargs(argument):
+        pass
+
+    @when('onearg ARGUMENT', enforce_signature=False)
+    def noargs():
+        pass
+
+
 @pytest.mark.parametrize('ctx,expected', [
     (None, 'north'),
     ('confused', 'south'),
