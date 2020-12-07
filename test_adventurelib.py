@@ -141,6 +141,18 @@ def test_register_args():
     assert args == ['north']
 
 
+def test_register_wrong_args():
+    with pytest.raises(adventurelib.InvalidCommand):
+        @when('noargs')
+        def noargs(argument):
+            pass
+
+    with pytest.raises(adventurelib.InvalidCommand):
+        @when('onearg ARGUMENT')
+        def noargs():
+            pass
+
+
 @pytest.mark.parametrize('ctx,expected', [
     (None, 'north'),
     ('confused', 'south'),
