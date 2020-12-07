@@ -382,14 +382,16 @@ def _register(command, func, context=None, kwargs={}):
     sig = inspect.signature(func)
     func_argnames = set(sig.parameters)
     when_argnames = set(pattern.argnames) | set(kwargs.keys())
-    if func_argnames != when_argnames:
-        raise InvalidCommand(
-            'The function %s%s has the wrong signature for @when(%r)' % (
-                func.__name__, sig, command
-            ) + '\n\nThe function arguments should be (%s)' % (
-                ', '.join(pattern.argnames + list(kwargs.keys()))
+    enforce_signature = kwargs.pop('enforce_signature', True)
+    if enforce_signature:
+        if func_argnames != when_argnames:
+            raise InvalidCommand(
+                'The function %s%s has the wrong signature for @when(%r)' % (
+                    func.__name__, sig, command
+                ) + '\n\nThe function arguments should be (%s)' % (
+                    ', '.join(pattern.argnames + list(kwargs.keys()))
+                )
             )
-        )
 
     commands.append((pattern, func, kwargs))
 
