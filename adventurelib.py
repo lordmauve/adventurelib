@@ -376,8 +376,10 @@ class Bag(set):
         return obj
 
 
-def _register(command, func, context=None, kwargs={}):
+def _register(command, func, context=None, kwargs=None):
     """Register func as a handler for the given command."""
+    if kwargs is None:
+        kwargs = {}
     pattern = Pattern(command, context)
     sig = inspect.signature(func)
     func_argnames = set(sig.parameters)
