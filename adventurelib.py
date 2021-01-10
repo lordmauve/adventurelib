@@ -6,6 +6,7 @@ try:
 except ImportError:
     pass
 import textwrap
+import font_styles
 import random
 from copy import deepcopy
 try:
@@ -627,7 +628,7 @@ def start(help=True):
         _handle_command(cmd)
 
 
-def say(msg):
+def say(msg, fg='default', bg='default'):
     """Print a message.
 
     Unlike print(), this deals with de-denting and wrapping of text to fit
@@ -637,11 +638,13 @@ def say(msg):
     separately.
 
     """
-    msg = str(msg)
+    text_format = font_styles.text_color(fg) + font_styles.background_color(bg)
+    msg = text_format + str(msg) + font_styles.reset_formatting()
     msg = re.sub(r'^[ \t]*(.*?)[ \t]*$', r'\1', msg, flags=re.M)
     width = get_terminal_size()[0]
     paragraphs = re.split(r'\n(?:[ \t]*\n)', msg)
     formatted = (textwrap.fill(p.strip(), width=width) for p in paragraphs)
+
     print('\n\n'.join(formatted))
 
 

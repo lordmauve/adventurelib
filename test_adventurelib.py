@@ -188,7 +188,7 @@ def test_say_room():
     buf = StringIO()
     with redirect_stdout(buf):
         say(r)
-    assert buf.getvalue() == 'You are standing in a hallway.\n'
+    assert buf.getvalue() == 'You are standing in a hallway.' + u'\u001b[0m\n'
 
 
 def test_say_wrap():
@@ -199,7 +199,7 @@ def test_say_wrap():
 
     assert out == (
         "This is a long sentence that the say\n"
-        "command will wrap.\n"
+        "command will wrap. " + u"\u001b[0m\n"
     )
 
 
@@ -213,7 +213,7 @@ def test_say_wrap2():
         "This is a long\n"
         "sentence that the\n"
         "say command will\n"
-        "wrap.\n"
+        "wrap. " + u"\u001b[0m\n"
     )
 
 
@@ -230,7 +230,7 @@ def test_say_multiple_paragraph():
         "command will wrap.\n"
         "\n"
         "And this is a second paragraph that is\n"
-        "separately wrapped.\n"
+        "separately wrapped. " + u"\u001b[0m\n"
     )
 
 
@@ -244,8 +244,18 @@ def test_say_multiline_paragraph():
     assert out == (
         "This is a long sentence that the say\n"
         "command will wrap, and this clause is\n"
-        "indented to match.\n"
+        "indented to match. " + u"\u001b[0m\n"
     )
+
+
+def test_say_room_colored():
+    r = Room('You are standing in a hallway.')
+
+    buf = StringIO()
+    with redirect_stdout(buf):
+        say(r, 'yellow', 'cyan')
+    assert buf.getvalue() == '\u001b[33;1m\u001b[46;1mYou are standing ' \
+        'in a hallway.' + u'\u001b[0m\n'
 
 
 @patch('random.randrange', return_value=0)
