@@ -72,7 +72,7 @@ def show_inventory():
         say(thing)
 
 @when('cast', context='magic_aura', magic=None)
-@when('cast MAGIC', context='magic aura')
+@when('cast MAGIC', context='magic_aura')
 def cast(magic):
     if magic == None:
         say("Which magic you would like to spell?")
