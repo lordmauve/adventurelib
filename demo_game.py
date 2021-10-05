@@ -72,9 +72,12 @@ def show_inventory():
         say(thing)
 
 @when('cast', context='magic_aura', magic=None)
+@when('cast MAGIC', context='magic_aura')
 def cast(magic):
     if magic == None:
         say("Which magic you would like to spell?")
+    elif magic == 'fireball':
+        say("A flaming Fireball shoots form your hands!")
 
 look()
 start()

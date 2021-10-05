@@ -251,7 +251,7 @@ def test_say_multiline_paragraph():
 @patch('random.randrange', return_value=0)
 def test_bag_get_random(randrange):
     """We can select an item from a bag at random."""
-    bag = Bag(['a', 'b', 'c'])
+    bag = Bag(map(Item, 'abc'))
     assert bag.get_random() == list(bag)[0]
     randrange.assert_called_once_with(3)
 
@@ -259,7 +259,7 @@ def test_bag_get_random(randrange):
 @patch('random.randrange', return_value=1)
 def test_bag_get_random2(randrange):
     """We can select an item from a bag at random."""
-    bag = Bag(['a', 'b', 'c'])
+    bag = Bag(map(Item, 'abc'))
     assert bag.get_random() == list(bag)[1]
     randrange.assert_called_once_with(3)
 
@@ -273,7 +273,7 @@ def test_empty_bag_get_random():
 @patch('random.randrange', return_value=0)
 def test_bag_take_random(randrange):
     """We can select and remove an item from a bag at random."""
-    bag = Bag(['a', 'b', 'c'])
+    bag = Bag(map(Item, 'abc'))
     items = list(bag)
     assert bag.take_random() == items[0]
     assert bag == Bag(items[1:])
@@ -283,15 +283,17 @@ def test_bag_take_random(randrange):
 def test_bag_find():
     """We can find items in a bag by name, case insensitively."""
     name, *aliases = ['Name', 'UPPER ALIAS', 'lower alias']
-    bag = Bag({
-        Item(name, *aliases)
-    })
+    named_item = Item(name, *aliases)
+    appellative_item = Item('appellation', *aliases)
+    nameless_item = Item('noname', 'none at all')
+    bag = Bag({named_item, appellative_item, nameless_item})
 
-    assert bag.find('name')
-    assert bag.find('Name')
-    assert bag.find('NAME')
-    assert bag.find('upper alias')
-    assert bag.find('LOWER ALIAS')
+    assert bag.find('name') is named_item
+    assert bag.find('Name') is named_item
+    assert bag.find('NAME') is named_item
+    assert bag.find('appellation') is appellative_item
+    assert bag.find('upper alias') in {named_item, appellative_item}
+    assert bag.find('LOWER ALIAS') in {named_item, appellative_item}
     assert not bag.find('other')
 
 
