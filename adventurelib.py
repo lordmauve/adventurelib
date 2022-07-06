@@ -20,6 +20,7 @@ except ImportError:
 __version__ = '1.2.1'
 __all__ = (
     'when',
+    'load_data',
     'start',
     'Room',
     'Item',
@@ -29,6 +30,7 @@ __all__ = (
     'get_context',
 )
 
+DEBUG = True # print and allow debug commands
 
 #: The current context.
 #:
@@ -122,6 +124,9 @@ class InvalidCommand(Exception):
 class InvalidDirection(Exception):
     """The direction specified was not pre-declared."""
 
+
+class InvalidGameData(Exception):
+    """The game data file provided is not valid.""" # TODO make this better
 
 class Placeholder:
     """Match a word in a command string."""
@@ -604,8 +609,118 @@ def _handle_command(cmd):
     print()
 
 
+def load_data(filepath):
+    """Load the JSON file that stores the game data."""
+    from json import load
+
+    game_data = None
+    try:
+        with open(filepath, "r") as file:
+            game_data = load(file)
+    except:
+        print('An error occured while loading the game data.')
+
+    item_data = game_data["items"]
+    npc_data  = game_data["npcs"]
+    room_data = game_data["rooms"]
+    exit_data = game_data["exits"]
+
+    Item.name = ""
+    Item.description = ""
+    Item.unique = False
+
+    Room.name  = ""
+    Room.items = Bag()
+    Room.npcs  = Bag()
+    # Room.connections?
+
+    # ITEMS
+    items = {}
+    for KEY in item_data.keys():
+        itd = item_data[KEY]
+        it = Item(itd.get('names')[0]) # , **it_data.get('names')) TODO
+        it.name = KEY
+        it.description = itd.get('description')
+        it.unique = itd.get('unique')
+        items[KEY] = it
+
+    # NPCS
+    npcs = {}
+    for KEY in npc_data.keys():
+        nd = npc_data[KEY]
+        npc = Item(nd.get('names')[0])
+        npc.name = KEY
+        npc.description = nd.get('description')
+        npcs[KEY] = npc
+
+    # ROOMS
+    rooms = {}
+    for KEY in room_data.keys():
+        rd = room_data[KEY]
+        room = Room(rd.get('description'))
+        room.name = KEY
+
+        for itname in rd.get('items'): # resolve items
+            it = items.get(itname, None)
+            if it is None:
+                raise InvalidGameData(f"Your item '{itname}' is referenced incorrectly or does not exist.")
+
+            room.items.add(it)
+
+        for npcname in rd.get('npcs'): # resolve npcs
+            npc = npcs.get(npcname)
+            if npc is None:
+                raise InvalidGameData(f"Your NPC '{npcname}' is referenced incorrectly or does not exist.")
+
+            room.npcs.add(npc)
+            
+        rooms[KEY] = room
+
+    # resolve room connections
+    for exit in exit_data:
+
+        try:
+            Room.add_direction(exit.get('forward'), exit.get('reverse'))
+        except:
+            pass
+
+        start = rooms.get(exit.get('start'))
+        if start is None:
+            raise InvalidGameData(f"Problem with connecting room {exit.get('start')}")
+
+        end = rooms.get(exit.get('end'))
+        if end is None:
+            raise InvalidGameData(f"Problem with connecting room {exit.get('end')}")
+
+        setattr(start, exit.get('forward'), end)
+        setattr(end, exit.get('reverse'), start) # NOTE adventurelib should already handle doing this?
+
+    if DEBUG:
+        debug_log(items, npcs, rooms)
+    return (items, npcs, rooms)
+
+def debug_log(items, npcs, rooms):
+    from pprint import pprint
+
+    print('')
+    print(' -- DEBUG -- ')
+    print('')
+
+    pprint(f"ITEMS : {[x for x in items]}")
+    pprint(f"NPCS : {[x for x in npcs]}")
+    
+    print("ROOMS : \n")
+    for room in rooms.items():
+        pprint(f"NAME : {room[0]}")
+        pprint(f"   items : {[it for it in room[1].items]}")
+        pprint(f"   npcs : {[npc for npc in room[1].npcs]}")
+        pprint(f"   exits : {room[1].exits()}")
+
 def start(help=True):
     """Run the game."""
+    if DEBUG:
+        print('Running adventurelib development build...')
+        
     if help:
         # Ugly, but we want to keep the arguments consistent
         help = globals()['help']
