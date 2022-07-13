@@ -126,7 +126,7 @@ class InvalidDirection(Exception):
 
 
 class InvalidGameData(Exception):
-    """The game data file provided is not valid.""" # TODO make this better
+    """The game data file provided is not valid."""
 
 class Placeholder:
     """Match a word in a command string."""
@@ -632,7 +632,6 @@ def load_data(filepath):
     Room.name  = ""
     Room.items = Bag()
     Room.npcs  = Bag()
-    # Room.connections?
 
     # ITEMS
     items = {}
@@ -693,13 +692,13 @@ def load_data(filepath):
             raise InvalidGameData(f"Problem with connecting room {exit.get('end')}")
 
         setattr(start, exit.get('forward'), end)
-        setattr(end, exit.get('reverse'), start) # NOTE adventurelib should already handle doing this?
+        setattr(end, exit.get('reverse'), start)
 
     if DEBUG:
         debug_log(items, npcs, rooms)
     return (items, npcs, rooms)
 
-def debug_log(items, npcs, rooms):
+def debug_log(items, npcs, rooms): # simple debug command, can be attached to a @when
     from pprint import pprint
 
     print('')
