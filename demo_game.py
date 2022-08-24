@@ -29,7 +29,7 @@ def go(direction):
     room = current_room.exit(direction)
     if room:
         current_room = room
-        say('You go %s.' % direction)
+        say(f'You go {direction}.')
         look()
         if room == magic_forest:
             set_context('magic_aura')
@@ -41,19 +41,19 @@ def go(direction):
 def take(item):
     obj = current_room.items.take(item)
     if obj:
-        say('You pick up the %s.' % obj)
+        say(f'You pick up the {obj}.')
         inventory.add(obj)
     else:
-        say('There is no %s here.' % item)
+        say(f'There is no {item} here.')
 
 
 @when('drop THING')
 def drop(thing):
     obj = inventory.take(thing)
     if not obj:
-        say('You do not have a %s.' % thing)
+        say(f'You do not have a {thing}.')
     else:
-        say('You drop the %s.' % obj)
+        say(f'You drop the {obj}.')
         current_room.items.add(obj)
 
 
@@ -61,8 +61,8 @@ def drop(thing):
 def look():
     say(current_room)
     if current_room.items:
-        for i in current_room.items:
-            say('A %s is here.' % i)
+        for item in current_room.items:
+            say(f'A {item} is here.')
 
 
 @when('inventory')
