@@ -7,8 +7,6 @@ import pytest
 import adventurelib
 from adventurelib import Pattern, when, _handle_command, say, Room, Item, Bag
 
-orig_commands = adventurelib.commands[:]
-
 
 @contextmanager
 def active_context(ctx):
@@ -21,8 +19,10 @@ def active_context(ctx):
         adventurelib.set_context(prev_ctx)
 
 
-def teardown():
-    """Reset the commands."""
+@pytest.fixture(autouse=True)
+def setup_commands():
+    orig_commands = adventurelib.commands[:]
+    yield
     adventurelib.commands[:] = orig_commands
 
 
