@@ -212,6 +212,11 @@ class Item:
             for label in (name,) + aliases
         )
 
+        # Copy class Bags to instance variables
+        for k, v in vars(type(self)).items():
+            if isinstance(v, Bag):
+                setattr(self, k, deepcopy(v))
+
     def __repr__(self):
         return '%s(%s)' % (
             type(self).__name__,
